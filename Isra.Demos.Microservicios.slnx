@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Isra.Demos.EventSource.Models/Isra.Demos.EventSource.Models.csproj" Id="b9e780d1-87b3-42ae-844f-b471f8ad8511" />
+  <Project Path="Isra.Demos.EventStore/Isra.Demos.EventStore.csproj" Id="7c852c33-1bad-43b8-ae80-96457d972abc" />
+</Solution>
