@@ -110,9 +110,10 @@ namespace Isra.Demos.EventStore.Controllers
                 var cuenta = await _cuentaService.ObtenerCuentaAsync(cuentaId);
                 return Ok(new 
                 { 
-                    cuentaId = cuentaId,
+                    cuentaId,
                     saldo = cuenta.Saldo,
-                    version = cuenta.Version 
+                    version = cuenta.Version,
+                    cuenta.Propietario
                 });
             }
             catch (Exception ex)

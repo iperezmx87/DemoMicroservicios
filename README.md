@@ -51,7 +51,8 @@ POST /api/cuentas/{cuentaId}/depositar
 Content-Type: application/json
 
 {
-  "monto": 100.50
+  "monto": 100.50,
+  "propietario": "Juan García"
 }
 ```
 
@@ -61,13 +62,23 @@ POST /api/cuentas/{cuentaId}/retirar
 Content-Type: application/json
 
 {
-  "monto": 50.25
+  "monto": 50.25,
+  "propietario": "Juan García"
 }
 ```
 
 ### 4. Obtener Saldo
 ```
 GET /api/cuentas/{cuentaId}/saldo
+```
+
+**Respuesta:**
+```json
+{
+  "cuentaId": "550e8400-e29b-41d4-a716-446655440000",
+  "saldo": 50.25,
+  "version": 2
+}
 ```
 
 ## 📦 Dependencias
@@ -101,19 +112,24 @@ Para cambiar la cadena de conexión, edita `appsettings.json`:
 Isra.Demos.EventStore/
 ├── Controllers/
 │   └── CuentasController.cs          # Endpoints de la API
+├── Models/
+│   └── RequestModel.cs               # Modelos de solicitud
 ├── Services/
-│   └── CuentaBancariaService.cs      # Lógica de negocio
+│   ├── ICuentaBancariaService.cs    # Interfaz del servicio
+│   └── CuentaBancariaService.cs     # Lógica de negocio
 ├── Repositories/
-│   └── EventRepository.cs             # Persistencia de eventos
-├── Config/
-│   └── MongoDbConfig.cs              # Configuración de MongoDB
-├── GlobalUsings.cs                    # Using statements globales
-├── Program.cs                         # Configuración de la aplicación
-└── appsettings.json                  # Configuración
+│   ├── IRepositorioEventos.cs       # Interfaz del repositorio
+│   └── RepositorioEventos.cs        # Persistencia de eventos
+├── Properties/
+│   └── launchSettings.json          # Configuración de inicio
+├── Program.cs                        # Configuración de la aplicación
+├── Isra.Demos.EventStore.http       # Ejemplos de prueba HTTP
+└── appsettings.json                 # Configuración
 
 Isra.Demos.EventSource.Models/
-├── Eventos.cs                         # Definición de eventos
-└── CuentaBancaria.cs                  # Agregado
+├── EventoBase.cs                     # Clase base para eventos
+├── Eventos.cs                        # Definición de eventos (DineroDepositado, DineroRetirado)
+└── CuentaBancaria.cs                 # Agregado CuentaBancaria
 ```
 
 ## 🎯 Ejemplo de Uso
@@ -129,14 +145,14 @@ curl -X POST https://localhost:5001/api/cuentas/crear \
 ```bash
 curl -X POST https://localhost:5001/api/cuentas/550e8400-e29b-41d4-a716-446655440000/depositar \
   -H "Content-Type: application/json" \
-  -d '{"monto":1000}'
+  -d '{"monto":1000,"propietario":"Juan García"}'
 ```
 
 3. **Retirar dinero**
 ```bash
 curl -X POST https://localhost:5001/api/cuentas/550e8400-e29b-41d4-a716-446655440000/retirar \
   -H "Content-Type: application/json" \
-  -d '{"monto":250}'
+  -d '{"monto":250,"propietario":"Juan García"}'
 ```
 
 4. **Consultar saldo**
