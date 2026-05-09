@@ -8,12 +8,15 @@ builder.Services.AddOpenApi();
 MongoDbConfig.RegistrarMapeos();
 
 // Configurar MongoDB
-var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb") ?? "mongodb://localhost:27017";
+var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb") 
+                            ?? Constantes.MongoDbConnectionString;
+
 var mongoClient = new MongoClient(mongoConnectionString);
-var mongoDatabase = mongoClient.GetDatabase("BDEventSource");
+var mongoDatabase = mongoClient.GetDatabase(Constantes.EventStoreDatabaseName);
 
 builder.Services.AddSingleton(mongoDatabase);
 builder.Services.AddScoped<IRepositorioEventos, RepositorioEventos>();
+builder.Services.AddScoped<IColaMensajesService, KafkaColaMensajesService>();
 builder.Services.AddScoped<ICuentaBancariaService, CuentaBancariaService>();
 
 var app = builder.Build();

@@ -15,7 +15,7 @@ namespace Isra.Demos.EventStore.Repositories
         /// <param name="database"></param>
         public RepositorioEventos(IMongoDatabase database)
         {
-            _collection = database.GetCollection<EventoBase>("event_source");
+            _collection = database.GetCollection<EventoBase>(Constantes.EventStoreCollectionName);
         }
 
         /// <summary>

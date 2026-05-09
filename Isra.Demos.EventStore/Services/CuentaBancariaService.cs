@@ -8,14 +8,18 @@ namespace Isra.Demos.EventStore.Services
     public class CuentaBancariaService : ICuentaBancariaService
     {
         private readonly IRepositorioEventos _repositorioEventos;
+        private readonly IColaMensajesService _colaMensajesService;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="eventRepository"></param>
-        public CuentaBancariaService(IRepositorioEventos eventRepository)
+        /// <param name="colaMensajesService"></param>
+        public CuentaBancariaService(IRepositorioEventos eventRepository
+            , IColaMensajesService colaMensajesService)
         {
             _repositorioEventos = eventRepository;
+            _colaMensajesService = colaMensajesService;
         }
 
         /// <summary>
@@ -26,7 +30,7 @@ namespace Isra.Demos.EventStore.Services
         public async Task CrearCuentaAsync(Guid cuentaId)
         {
             var cuenta = new CuentaBancaria(cuentaId);
-            
+
             // Una cuenta nueva no tiene eventos iniciales
             await Task.CompletedTask;
         }
@@ -42,11 +46,12 @@ namespace Isra.Demos.EventStore.Services
         {
             var cuenta = await ObtenerCuentaAsync(cuentaId);
             cuenta.Depositar(monto, propietario);
-            
+
             // Guardar los eventos generados
             foreach (var evento in cuenta.ObtenerEventos())
             {
                 await _repositorioEventos.GuardarEventoAsync(evento);
+                await _colaMensajesService.PublicarEventoAsync(evento);
             }
 
             cuenta.LimpiarEventos();
@@ -63,16 +68,16 @@ namespace Isra.Demos.EventStore.Services
         {
             var cuenta = await ObtenerCuentaAsync(cuentaId);
             cuenta.Retirar(monto, propietario);
-            
+
             // Guardar los eventos generados
             foreach (var evento in cuenta.ObtenerEventos())
             {
                 await _repositorioEventos.GuardarEventoAsync(evento);
+                await _colaMensajesService.PublicarEventoAsync(evento);
             }
 
             cuenta.LimpiarEventos();
         }
-
 
         /// <summary>
         /// Obtiene la info de la cuenta
@@ -83,7 +88,7 @@ namespace Isra.Demos.EventStore.Services
         {
             var cuenta = new CuentaBancaria(cuentaId);
             var eventos = await _repositorioEventos.ObtenerEventosPorAgregadoAsync(cuentaId);
-            
+
             if (eventos.Any())
             {
                 cuenta.ReconstructirDesdeEventos(eventos);
