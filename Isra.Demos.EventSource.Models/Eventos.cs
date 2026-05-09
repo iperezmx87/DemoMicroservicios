@@ -29,6 +29,14 @@
             Version = version;
             Propietario = propietario;
         }
+
+        /// <summary>
+        /// constructor sin parámetros para permitir la deserialización del evento desde JSON, ya que algunas bibliotecas de serialización requieren un constructor sin parámetros para crear una instancia del objeto antes de asignar las propiedades. Este constructor es esencial para garantizar que el proceso de deserialización funcione correctamente, permitiendo que el evento se reconstruya a partir de su representación JSON sin problemas.
+        /// </summary>
+        public DineroDepositadoEvento()
+        {
+            
+        }
     }
 
     /// <summary>
@@ -59,6 +67,14 @@
             Monto = monto;
             Version = version;
             Propietario = propietario;
+        }
+
+        /// <summary>
+        /// constructor sin parámetros para permitir la deserialización del evento desde JSON, ya que algunas bibliotecas de serialización requieren un constructor sin parámetros para crear una instancia del objeto antes de asignar las propiedades. Este constructor es esencial para garantizar que el proceso de deserialización funcione correctamente, permitiendo que el evento se reconstruya a partir de su representación JSON sin problemas.
+        /// </summary>
+        public DineroRetiradoEvento()
+        {
+            
         }
     }
 }

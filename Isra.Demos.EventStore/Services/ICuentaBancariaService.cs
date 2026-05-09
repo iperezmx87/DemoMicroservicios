@@ -1,4 +1,6 @@
-﻿namespace Isra.Demos.EventStore.Services
+﻿using Isra.Demos.EventStore.Models;
+
+namespace Isra.Demos.EventStore.Services
 {
     /// <summary>
     /// Servicio para manejar operaciones en cuentas bancarias

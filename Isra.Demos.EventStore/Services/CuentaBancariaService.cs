@@ -1,4 +1,4 @@
-using Isra.Demos.EventStore.Repositories;
+using Isra.Demos.EventStore.Models;
 
 namespace Isra.Demos.EventStore.Services
 {
@@ -8,6 +8,7 @@ namespace Isra.Demos.EventStore.Services
     public class CuentaBancariaService : ICuentaBancariaService
     {
         private readonly IRepositorioEventos _repositorioEventos;
+
         private readonly IColaMensajesService _colaMensajesService;
 
         /// <summary>
@@ -15,8 +16,8 @@ namespace Isra.Demos.EventStore.Services
         /// </summary>
         /// <param name="eventRepository"></param>
         /// <param name="colaMensajesService"></param>
-        public CuentaBancariaService(IRepositorioEventos eventRepository
-            , IColaMensajesService colaMensajesService)
+        public CuentaBancariaService(IRepositorioEventos eventRepository,
+            IColaMensajesService colaMensajesService)
         {
             _repositorioEventos = eventRepository;
             _colaMensajesService = colaMensajesService;
@@ -51,7 +52,15 @@ namespace Isra.Demos.EventStore.Services
             foreach (var evento in cuenta.ObtenerEventos())
             {
                 await _repositorioEventos.GuardarEventoAsync(evento);
-                await _colaMensajesService.PublicarEventoAsync(evento);
+
+                await _colaMensajesService.PublicarDineroDepositadoEventoAsync(
+                    new DineroDepositadoEvento(
+                        evento.AggregateId,
+                        monto, evento.Version, propietario)
+                    {
+                        EventId = evento.EventId,
+                        OcurridoEn = evento.OcurridoEn
+                    });
             }
 
             cuenta.LimpiarEventos();
@@ -73,7 +82,15 @@ namespace Isra.Demos.EventStore.Services
             foreach (var evento in cuenta.ObtenerEventos())
             {
                 await _repositorioEventos.GuardarEventoAsync(evento);
-                await _colaMensajesService.PublicarEventoAsync(evento);
+
+                await _colaMensajesService.PublicarDineroRetiradoEventoAsync(
+                   new DineroRetiradoEvento(
+                       evento.AggregateId,
+                       monto, evento.Version, propietario)
+                   {
+                       EventId = evento.EventId,
+                       OcurridoEn = evento.OcurridoEn
+                   });
             }
 
             cuenta.LimpiarEventos();

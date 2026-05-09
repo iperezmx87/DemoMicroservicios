@@ -44,34 +44,31 @@ namespace Isra.Demos.Microservicios.Saldo
                         var result = _consumer.Consume(stoppingToken);
                         var eventoJson = result.Message.Value;
 
-                        //// 1. Analizamos el JSON sin deserializarlo a clase todavía
-                        //using JsonDocument doc = JsonDocument.Parse(eventoJson);
-                        //JsonElement root = doc.RootElement;
+                        // 1. Analizamos el JSON sin deserializarlo a clase todavía
+                        using JsonDocument doc = JsonDocument.Parse(eventoJson);
+                        JsonElement root = doc.RootElement;
 
-                        //// 2. Buscamos la propiedad que diferencia el evento (ej. "TipoEvento")
-                        //string tipoEvento = root.GetProperty("TipoEvento").GetString();
+                        // 2. Buscamos la propiedad que diferencia el evento (ej. "TipoEvento")
+                        string tipoEvento = root.GetProperty("TipoEvento").GetString();
 
-                        //switch (tipoEvento)
-                        //{
-                        //    case "DineroDepositadoEvento":
-                        //        var deposito = JsonSerializer.Deserialize<DineroDepositadoEvento>(eventoJson);
+                        switch (tipoEvento)
+                        {
+                            case "DineroDepositadoEvento":
+                                var deposito = JsonSerializer.Deserialize<DineroDepositadoEvento>(eventoJson);
 
-                        //        Console.WriteLine($"Deposito: {deposito.Propietario} {deposito.Monto}");
+                                Console.WriteLine($"Deposito: {deposito.Propietario} {deposito.Monto}");
 
-                        //        break;
+                                break;
 
-                        //    case "DineroRetiradoEvento":
-                        //        var retiro = JsonSerializer.Deserialize<DineroRetiradoEvento>(eventoJson);
+                            case "DineroRetiradoEvento":
+                                var retiro = JsonSerializer.Deserialize<DineroRetiradoEvento>(eventoJson);
 
-                        //        Console.WriteLine($"Retiro: {retiro.Propietario} {retiro.Monto}");
-                        //        break;
+                                Console.WriteLine($"Retiro: {retiro.Propietario} {retiro.Monto}");
+                                break;
 
-                        //    default:
-                        //        break;
-                        //}
-
-
-                        //  Console.WriteLine($"Mensaje recibido: {result.Message.Value}");
+                            default:
+                                break;
+                        }
                     }
                     catch (OperationCanceledException) { break; }
                     catch (Exception ex) { Console.WriteLine($"Error: {ex.Message}"); }

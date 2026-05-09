@@ -29,13 +29,32 @@ namespace Isra.Demos.EventStore.Services
         /// </summary>
         /// <param name="evento"></param>
         /// <returns></returns>
-        public async Task PublicarEventoAsync(EventoBase evento)
+        public async Task PublicarDineroDepositadoEventoAsync(
+            DineroDepositadoEvento evento)
         {
             var mensaje = JsonSerializer.Serialize(evento);
 
+            await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
+        }
+
+        /// <summary>
+        /// Publica el mensaje en la cola
+        /// </summary>
+        /// <param name="evento"></param>
+        /// <returns></returns>
+        public async Task PublicarDineroRetiradoEventoAsync(
+            DineroRetiradoEvento evento)
+        {
+            var mensaje = JsonSerializer.Serialize(evento);
+
+            await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
+        }
+
+        private async Task PublicarEventoAsync(string llave, string mensaje)
+        {
             await _producer.ProduceAsync(Constantes.KafkaTopic, new Message<string, string>
             {
-                Key = evento.EventId.ToString(),
+                Key = llave,
                 Value = mensaje
             });
         }

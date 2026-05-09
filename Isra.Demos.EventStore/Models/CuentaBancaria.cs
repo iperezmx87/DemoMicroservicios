@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Isra.Demos.EventSource.Models
+namespace Isra.Demos.EventStore.Models
 {
     /// <summary>
     /// Agregado que representa una cuenta bancaria y su estado
@@ -84,7 +84,7 @@ namespace Isra.Demos.EventSource.Models
             if (Saldo < monto)
                 throw new InvalidOperationException("Saldo insuficiente");
 
-            Propietario = propietario; // Mantener el mismo propietario para el evento de retiro
+            Propietario = propietario;
 
             var evento = new DineroRetiradoEvento(
                 Id, monto, Version + 1, Propietario);

@@ -10,6 +10,15 @@
         /// </summary>
         /// <param name="evento"></param>
         /// <returns></returns>
-        Task PublicarEventoAsync(EventoBase evento);
+        Task PublicarDineroDepositadoEventoAsync(
+            DineroDepositadoEvento evento);
+
+        /// <summary>
+        /// Publica el evento en la cola de mensajes
+        /// </summary>
+        /// <param name="evento"></param>
+        /// <returns></returns>
+        Task PublicarDineroRetiradoEventoAsync(
+            DineroRetiradoEvento evento);
     }
 }
