@@ -8,12 +8,18 @@
 		<UserSecretsId>dotnet-Isra.Demos.Microservicios.Saldo-3942afa1-2b53-4f81-8c9f-18695fad4e25</UserSecretsId>
 	</PropertyGroup>
 
+	<!-- Configuración de empaquetado para docker -->
+	<PropertyGroup>
+		<RootNamespace>Isra.Demos.Microservicios.Saldo</RootNamespace>
+		<ContainerRepository>pesimx87/isra-microservicios-saldo</ContainerRepository>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Confluent.Kafka" Version="2.14.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Isra.Demos.EventSource.Models\Isra.Demos.EventSource.Models.csproj" />
+		<ProjectReference Include="..\Isra.Demos.EventSource.Models\Isra.Demos.EventSource.Models.csproj" />
 	</ItemGroup>
 </Project>

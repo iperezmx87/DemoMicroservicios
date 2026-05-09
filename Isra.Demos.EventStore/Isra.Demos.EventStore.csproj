@@ -13,6 +13,12 @@
 		<PackageReference Include="MongoDB.Driver" Version="3.1.0" />
 	</ItemGroup>
 
+	<!-- Configuración de empaquetado para docker -->
+	<PropertyGroup>
+		<RootNamespace>Isra.Demos.EventStore</RootNamespace>
+		<ContainerRepository>pesimx87/isra-microservicios-eventstore</ContainerRepository>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\Isra.Demos.EventSource.Models\Isra.Demos.EventSource.Models.csproj" />
 	</ItemGroup>
