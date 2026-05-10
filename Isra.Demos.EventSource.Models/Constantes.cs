@@ -29,5 +29,15 @@
         /// Principal topico de Kafka donde se publicarán los eventos relacionados con las transacciones de cuenta.
         /// </summary>
         public const string KafkaTopic = "transacciones_cuenta";
+
+        /// <summary>
+        /// Nombre del grupo de consumidores de Kafka, en este caso se ha definido como "saldo-worker-group". Este nombre es importante para la gestión de los consumidores en Kafka, ya que permite que varios consumidores puedan compartir la carga de procesamiento de los mensajes en el tópico. Al utilizar un grupo de consumidores, se garantiza que cada mensaje se procese por un solo consumidor dentro del grupo, lo que es esencial para mantener la consistencia y evitar la duplicación en el procesamiento de eventos relacionados con las transacciones de cuenta.
+        /// </summary>
+        public const string KafkaGroupId = "saldo-worker-group";
+
+        /// <summary>
+        /// Cadena de conexión a PostgreSQL, en este caso se asume que PostgreSQL se está ejecutando localmente en el puerto 5432, con una base de datos llamada "BDMicroservicios" y credenciales de usuario "postgres" con contraseña "postgres". Esta cadena de conexión es fundamental para establecer la comunicación entre la aplicación y la base de datos PostgreSQL, permitiendo así el almacenamiento y recuperación de información relacionada con las transacciones de cuenta y otros datos relevantes para el funcionamiento del sistema. Al utilizar una cadena de conexión local, se facilita el desarrollo y las pruebas de la aplicación en un entorno controlado, aunque en un entorno de producción se recomendaría utilizar una configuración más robusta y segura para la conexión a la base de datos.
+        /// </summary>
+        public const string PostgresConnectionString = "Host=localhost;Port=5432;Database=bd_saldos_cuentas;Username=postgres;Password=";
     }
 }
