@@ -23,7 +23,7 @@ namespace Isra.Demos.Microservicios.Saldo
             var config = new ConsumerConfig
             {
                 BootstrapServers = Constantes.KafkaBootstrapServers,
-                GroupId = Constantes.KafkaGroupId,
+                GroupId = "cuenta-saldo-consumer-group",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
 
