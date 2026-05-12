@@ -1,6 +1,6 @@
 using Confluent.Kafka;
 using Dapper;
-using Isra.Demos.EventSource.Models;
+using Isra.Demos.Microservicios.Modelo;
 using Microsoft.Data.SqlClient;
 using System.Text.Json;
 
@@ -95,6 +95,8 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
         private async Task RegistrarMovimiento(dynamic evento, string tipo)
         {
             using var conn = new SqlConnection(_connectionString);
+
+            await conn.OpenAsync();
 
             // SQL Idempotente para SQL Server
             string sql = @"

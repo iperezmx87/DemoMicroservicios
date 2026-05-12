@@ -1,6 +1,6 @@
-using MongoDB.Driver;
+using Isra.Demos.Microservicios.Modelo;
 
-namespace Isra.Demos.EventStore.Repositories
+namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
 {
     /// <summary>
     /// Implementación del repositorio de eventos usando MongoDB

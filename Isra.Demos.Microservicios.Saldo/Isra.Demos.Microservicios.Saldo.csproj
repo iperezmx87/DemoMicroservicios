@@ -22,6 +22,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Isra.Demos.EventSource.Models\Isra.Demos.EventSource.Models.csproj" />
+	  <ProjectReference Include="..\Isra.Demos.Microservicios.Modelo\Isra.Demos.Microservicios.Modelo.csproj" />
 	</ItemGroup>
 </Project>

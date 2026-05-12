@@ -1,0 +1,6 @@
+@Isra.Demos.Microservicios.WebApi_HostAddress = http://localhost:5160
+
+GET {{Isra.Demos.Microservicios.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

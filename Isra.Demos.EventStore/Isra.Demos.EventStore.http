@@ -1,6 +1,0 @@
-@Isra.Demos.EventStore_HostAddress = http://localhost:5219
-
-GET {{Isra.Demos.EventStore_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

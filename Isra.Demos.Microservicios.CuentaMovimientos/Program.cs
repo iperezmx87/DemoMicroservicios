@@ -1,3 +1,8 @@
+using Isra.Demos.Microservicios.CuentaMovimientos.Configuracion;
+using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
+using Isra.Demos.Microservicios.Modelo;
+using Isra.Demos.Microservicios.Servicios;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -8,14 +13,16 @@ builder.Services.AddOpenApi();
 MongoDbConfig.RegistrarMapeos();
 
 // Configurar MongoDB
-var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb") 
+var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb")
                             ?? Constantes.MongoDbConnectionString;
 
 var mongoClient = new MongoClient(mongoConnectionString);
 var mongoDatabase = mongoClient.GetDatabase(Constantes.EventStoreDatabaseName);
 
+// Registrar servicios y repositorios
 builder.Services.AddSingleton(mongoDatabase);
 builder.Services.AddScoped<IRepositorioEventos, RepositorioEventos>();
+
 builder.Services.AddScoped<IColaMensajesService, KafkaColaMensajesService>();
 builder.Services.AddScoped<ICuentaBancariaService, CuentaBancariaService>();
 

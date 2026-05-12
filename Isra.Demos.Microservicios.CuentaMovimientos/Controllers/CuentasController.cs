@@ -1,8 +1,8 @@
+using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
+using Isra.Demos.Microservicios.Servicios;
 using Microsoft.AspNetCore.Mvc;
-using Isra.Demos.EventStore.Services;
-using Isra.Demos.EventStore.Models;
 
-namespace Isra.Demos.EventStore.Controllers
+namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
 {
     /// <summary>
     /// Controlador para operaciones de cuentas bancarias
@@ -49,9 +49,9 @@ namespace Isra.Demos.EventStore.Controllers
             {
                 await _cuentaService.DepositarAsync(cuentaId, request.Monto, request.Propietario);
                 var cuenta = await _cuentaService.ObtenerCuentaAsync(cuentaId);
-                return Ok(new 
-                { 
-                    mensaje = "Depósito realizado exitosamente", 
+                return Ok(new
+                {
+                    mensaje = "Depósito realizado exitosamente",
                     cuentaId,
                     saldoActual = cuenta.Saldo,
                     cuenta.Propietario
@@ -77,9 +77,9 @@ namespace Isra.Demos.EventStore.Controllers
             {
                 await _cuentaService.RetirarAsync(cuentaId, request.Monto, request.Propietario);
                 var cuenta = await _cuentaService.ObtenerCuentaAsync(cuentaId);
-                return Ok(new 
-                { 
-                    mensaje = "Retiro realizado exitosamente", 
+                return Ok(new
+                {
+                    mensaje = "Retiro realizado exitosamente",
                     cuentaId,
                     saldoActual = cuenta.Saldo,
                     cuenta.Propietario
@@ -92,29 +92,6 @@ namespace Isra.Demos.EventStore.Controllers
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// Obtener saldo de una cuenta
-        /// </summary>
-        [HttpGet("{cuentaId:guid}/saldo")]
-        public async Task<ActionResult<object>> ObtenerSaldo(Guid cuentaId)
-        {
-            try
-            {
-                var cuenta = await _cuentaService.ObtenerCuentaAsync(cuentaId);
-                return Ok(new 
-                { 
-                    cuentaId,
-                    saldo = cuenta.Saldo,
-                    version = cuenta.Version,
-                    cuenta.Propietario
-                });
             }
             catch (Exception ex)
             {

@@ -1,4 +1,6 @@
-﻿namespace Isra.Demos.EventStore.Services
+﻿using Isra.Demos.Microservicios.Modelo;
+
+namespace Isra.Demos.Microservicios.Servicios
 {
     /// <summary>
     /// Cola de mensajes

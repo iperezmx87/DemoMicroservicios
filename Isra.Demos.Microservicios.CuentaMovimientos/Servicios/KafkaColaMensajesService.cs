@@ -1,7 +1,8 @@
 ﻿using Confluent.Kafka;
+using Isra.Demos.Microservicios.Modelo;
 using System.Text.Json;
 
-namespace Isra.Demos.EventStore.Services
+namespace Isra.Demos.Microservicios.Servicios
 {
     /// <summary>
     /// Implementación de la cola de mensajes

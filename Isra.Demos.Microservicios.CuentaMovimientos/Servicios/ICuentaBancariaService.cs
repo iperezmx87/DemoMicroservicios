@@ -1,6 +1,6 @@
-﻿using Isra.Demos.EventStore.Models;
+﻿using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 
-namespace Isra.Demos.EventStore.Services
+namespace Isra.Demos.Microservicios.Servicios
 {
     /// <summary>
     /// Servicio para manejar operaciones en cuentas bancarias

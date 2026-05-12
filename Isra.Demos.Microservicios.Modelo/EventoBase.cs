@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Isra.Demos.EventSource.Models
+namespace Isra.Demos.Microservicios.Modelo
 {
     /// <summary>
     /// Modelo del evento

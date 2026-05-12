@@ -1,4 +1,4 @@
-﻿namespace Isra.Demos.EventStore.Models
+﻿namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
 {
     /// <summary>
     /// Solicitud para crear una cuenta

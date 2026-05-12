@@ -1,4 +1,4 @@
-﻿namespace Isra.Demos.EventSource.Models
+﻿namespace Isra.Demos.Microservicios.Modelo
 {
     /// <summary>
     /// Evento de dinero depositado

@@ -1,7 +1,8 @@
+using Isra.Demos.Microservicios.Modelo;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Isra.Demos.EventStore.Models
+namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
 {
     /// <summary>
     /// Agregado que representa una cuenta bancaria y su estado

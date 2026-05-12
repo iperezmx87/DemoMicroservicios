@@ -1,6 +1,6 @@
 using Confluent.Kafka;
 using Dapper;
-using Isra.Demos.EventSource.Models;
+using Isra.Demos.Microservicios.Modelo;
 using Npgsql;
 using System.Text.Json;
 
@@ -89,6 +89,8 @@ namespace Isra.Demos.Microservicios.Saldo
         private async Task ActualizarSaldo(EventoBase evento, bool esDeposito)
         {
             using var conn = new NpgsqlConnection(_connectionString);
+
+            await conn.OpenAsync();
 
             // El monto depende de si es deposito o retiro
             decimal montoModificador = 0;

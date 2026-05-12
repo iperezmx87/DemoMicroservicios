@@ -1,6 +1,7 @@
-﻿using MongoDB.Bson.Serialization;
+﻿using Isra.Demos.Microservicios.Modelo;
+using MongoDB.Bson.Serialization;
 
-namespace Isra.Demos.EventStore.Config
+namespace Isra.Demos.Microservicios.CuentaMovimientos.Configuracion
 {
     /// <summary>
     /// Clase de configuración para MongoDB, donde se registran los mapeos de las clases de eventos para que MongoDB pueda serializarlas y deserializarlas correctamente.
