@@ -1,5 +1,6 @@
 using Isra.Demos.Microservicios.WebApi.Contratos;
 using Isra.Demos.Microservicios.WebApi.Repositorio;
+using Isra.Demos.Microservicios.WebApi.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // agregar repositorios
 builder.Services.AddScoped<IEstadoCuentaRepositorio, EstadoCuentaRepositorio>();
 builder.Services.AddScoped<ISaldoRepositorio, SaldoRepositorio>();
+builder.Services.AddScoped<IGeneradorEstadoCuentaPdfService, GeneradorEstadoCuentaPdfService>();
 
 builder.Services.AddControllers();
 

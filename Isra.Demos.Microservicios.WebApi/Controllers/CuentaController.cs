@@ -12,17 +12,21 @@ namespace Isra.Demos.Microservicios.WebApi.Controllers
     {
         private readonly ISaldoRepositorio _saldoRepositorio;
         private readonly IEstadoCuentaRepositorio _estadoCuentaRepositorio;
+        private readonly IGeneradorEstadoCuentaPdfService _generadorEstadoCuentaPdfService;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="saldoRepositorio"></param>
         /// <param name="estadoCuentaRepositorio"></param>
+        /// <param name="generadorEstadoCuentaPdfService"></param>
         public CuentaController(ISaldoRepositorio saldoRepositorio,
-            IEstadoCuentaRepositorio estadoCuentaRepositorio)
+            IEstadoCuentaRepositorio estadoCuentaRepositorio,
+            IGeneradorEstadoCuentaPdfService generadorEstadoCuentaPdfService)
         {
             _saldoRepositorio = saldoRepositorio;
             _estadoCuentaRepositorio = estadoCuentaRepositorio;
+            _generadorEstadoCuentaPdfService = generadorEstadoCuentaPdfService;
         }
 
         /// <summary>
@@ -51,6 +55,20 @@ namespace Isra.Demos.Microservicios.WebApi.Controllers
                 return NotFound("No se encontraron transacciones para esta cuenta.");
 
             return Ok(estadoCuenta);
+        }
+
+        /// <summary>
+        /// Genera el pdf del estado de cuenta
+        /// </summary>
+        /// <param name="cuentaId"></param>
+        /// <returns></returns>
+        [HttpGet("{cuentaId}/estado-cuenta-pdf")]
+        public async Task<IActionResult> CrearEstadoCuentaPDF(Guid cuentaId)
+        {
+            var estadoPdf = await _generadorEstadoCuentaPdfService.GenerarEstadoCuentaPdf(cuentaId);
+
+            // 3. Retornar el archivo
+            return File(estadoPdf, "application/pdf", $"EstadoCuenta_{cuentaId}.pdf");
         }
     }
 }
