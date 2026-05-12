@@ -1,174 +1,74 @@
-# API de Event Sourcing - Cuentas Bancarias
+# 🏦 Demo de Microservicios Bancarios - Event Sourcing & CQRS
 
-Este proyecto implementa el patrón **Event Sourcing** con arquitectura de **Domain-Driven Design (DDD)** para gestionar cuentas bancarias.
+Este repositorio es una demostración técnica de una arquitectura de microservicios distribuida para la gestión de operaciones bancarias, implementada con **.NET 10** y orientada a eventos.
 
-## 📋 Descripción
+## 🏗️ Arquitectura y Patrones de Diseño
 
-La solución contiene dos proyectos:
+El proyecto implementa una separación clara entre la escritura y la lectura de datos, garantizando alta escalabilidad y trazabilidad completa.
 
-1. **Isra.Demos.EventSource.Models** (.NET 10)
-   - Define los eventos del dominio (`DineroDepositado`, `DineroRetirado`)
-   - Contiene el agregado `CuentaBancaria`
-   - Usa MongoDB.Bson para serialización
 
-2. **Isra.Demos.EventStore** (.NET 10)
-   - API REST para gestionar cuentas y operaciones
-   - Repositorio de eventos
-   - Servicios de negocio
-   - Controlador con endpoints
 
-## 🏗️ Arquitectura
+### Patrones Destacados:
+* **Event Sourcing:** El estado actual de una cuenta no se almacena directamente, sino que se reconstruye a partir de una secuencia inmutable de eventos almacenados en **MongoDB**.
+* **CQRS (Command Query Responsibility Segregation):** Separación de los modelos de comando (escritura) y consulta (lectura).
+* **Event-Driven Architecture:** Comunicación asíncrona entre servicios mediante **Apache Kafka**.
+* **Proyecciones de Lectura:** Transformación de eventos en tablas relacionales optimizadas para el usuario final.
 
-### Event Sourcing
-- Cada cambio en una cuenta bancaria se registra como un evento
-- Los eventos se persisten en MongoDB en orden cronológico
-- El estado actual se reconstruye aplicando eventos en orden
+---
 
-### Eventos Disponibles
-- `DineroDepositado`: Se registra cuando se deposita dinero
-- `DineroRetirado`: Se registra cuando se retira dinero
+## 🛠️ Stack Tecnológico
 
-### Agregado: CuentaBancaria
-- `Id`: Identificador único de la cuenta
-- `Saldo`: Saldo actual (calculado desde eventos)
-- `Version`: Número de versión (incrementado con cada evento)
+| Capa | Tecnología |
+| :--- | :--- |
+| **Lenguaje / Runtime** | .NET 10 |
+| **Event Store (Escritura)** | MongoDB |
+| **Message Broker** | Apache Kafka |
+| **Proyección de Saldo** | PostgreSQL (Dapper) |
+| **Proyección de Historial** | SQL Server (Dapper) |
+| **Reporteo** | QuestPDF |
 
-## 🚀 Endpoints de la API
+---
 
-### 1. Crear Cuenta
-```
-POST /api/cuentas/crear
-Content-Type: application/json
+## 🚀 Flujo de Operaciones
 
-{
-  "cuentaId": "550e8400-e29b-41d4-a716-446655440000"
-}
-```
+1.  **Comando:** El usuario envía una operación (Depósito/Retiro) a la Web API.
+2.  **Persistencia de Evento:** El servicio valida la regla de negocio y persiste el evento en **MongoDB**.
+3.  **Publicación:** El evento se publica en un tópico de **Kafka**.
+4.  **Consumo y Proyección:**
+    * **Microservicio de Saldo:** Escucha el evento y actualiza atómicamente el balance en **PostgreSQL**.
+    * **Microservicio de Estado de Cuenta:** Registra el movimiento en **SQL Server** para auditoría.
+5.  **Consulta:** El front-end consulta el saldo o descarga un **PDF** profesional generado bajo demanda desde las proyecciones de lectura.
 
-### 2. Depositar Dinero
-```
-POST /api/cuentas/{cuentaId}/depositar
-Content-Type: application/json
+---
 
-{
-  "monto": 100.50,
-  "propietario": "Juan García"
-}
-```
+## 📂 Estructura de la Solución
 
-### 3. Retirar Dinero
-```
-POST /api/cuentas/{cuentaId}/retirar
-Content-Type: application/json
+* `Isra.Demos.Microservicios.Modelo`: Librería de clases con el Agregado de Dominio y los Contratos de Eventos.
+* `Isra.Demos.Microservicios.CuentaMovimientos`: Servicio de comandos (Write Side) encargado de la lógica de negocio.
+* `Isra.Demos.Microservicios.Saldo`: Background Service que proyecta el saldo actual en **Postgres**.
+* `Isra.Demos.Microservicios.EstadoCuenta`: Background Service que gestiona el historial en **SQL Server** y genera reportes PDF.
+* `Isra.Demos.Microservicios.WebApi`: Gateway de consulta que expone los endpoints para el Front-end.
 
-{
-  "monto": 50.25,
-  "propietario": "Juan García"
-}
-```
+---
 
-### 4. Obtener Saldo
-```
-GET /api/cuentas/{cuentaId}/saldo
-```
+## 📋 Requisitos y Ejecución
 
-**Respuesta:**
-```json
-{
-  "cuentaId": "550e8400-e29b-41d4-a716-446655440000",
-  "saldo": 50.25,
-  "version": 2
-}
-```
+1.  Levantar infraestructura mediante Docker:
+    ```bash
+    docker-compose up -d
+    ```
+    *(Asegúrate de tener instancias de Mongo, Kafka, Postgres y SQL Server listas)*.
+2.  Ejecutar la solución desde Visual Studio o vía CLI:
+    ```bash
+    dotnet run --project Isra.Demos.Microservicios.WebApi
+    ```
 
-## 📦 Dependencias
+---
 
-- **.NET 10**
-- **MongoDB.Driver 3.1.0**
-- **MongoDB.Bson 3.8.0**
-- **Microsoft.AspNetCore.OpenApi 10.0.4**
+## ✨ Características Especiales
+* **Idempotencia:** Garantizada mediante el control de versiones de eventos.
+* **Resiliencia:** Manejo de reintentos en el consumo de mensajes.
+* **Reportes Profesionales:** Generación de estados de cuenta con diseño bancario y soporte multimoneda.
 
-## 🔧 Configuración
-
-### MongoDB
-
-Asegúrate de que MongoDB esté corriendo. Por defecto, la aplicación se conecta a:
-```
-mongodb://localhost:27017
-```
-
-Para cambiar la cadena de conexión, edita `appsettings.json`:
-```json
-{
-  "ConnectionStrings": {
-    "MongoDb": "tu-conexion-mongodb"
-  }
-}
-```
-
-## 📚 Estructura del Proyecto
-
-```
-Isra.Demos.EventStore/
-├── Controllers/
-│   └── CuentasController.cs          # Endpoints de la API
-├── Models/
-│   └── RequestModel.cs               # Modelos de solicitud
-├── Services/
-│   ├── ICuentaBancariaService.cs    # Interfaz del servicio
-│   └── CuentaBancariaService.cs     # Lógica de negocio
-├── Repositories/
-│   ├── IRepositorioEventos.cs       # Interfaz del repositorio
-│   └── RepositorioEventos.cs        # Persistencia de eventos
-├── Properties/
-│   └── launchSettings.json          # Configuración de inicio
-├── Program.cs                        # Configuración de la aplicación
-├── Isra.Demos.EventStore.http       # Ejemplos de prueba HTTP
-└── appsettings.json                 # Configuración
-
-Isra.Demos.EventSource.Models/
-├── EventoBase.cs                     # Clase base para eventos
-├── Eventos.cs                        # Definición de eventos (DineroDepositado, DineroRetirado)
-└── CuentaBancaria.cs                 # Agregado CuentaBancaria
-```
-
-## 🎯 Ejemplo de Uso
-
-1. **Crear una cuenta**
-```bash
-curl -X POST https://localhost:5001/api/cuentas/crear \
-  -H "Content-Type: application/json" \
-  -d '{"cuentaId":"550e8400-e29b-41d4-a716-446655440000"}'
-```
-
-2. **Depositar dinero**
-```bash
-curl -X POST https://localhost:5001/api/cuentas/550e8400-e29b-41d4-a716-446655440000/depositar \
-  -H "Content-Type: application/json" \
-  -d '{"monto":1000,"propietario":"Juan García"}'
-```
-
-3. **Retirar dinero**
-```bash
-curl -X POST https://localhost:5001/api/cuentas/550e8400-e29b-41d4-a716-446655440000/retirar \
-  -H "Content-Type: application/json" \
-  -d '{"monto":250,"propietario":"Juan García"}'
-```
-
-4. **Consultar saldo**
-```bash
-curl https://localhost:5001/api/cuentas/550e8400-e29b-41d4-a716-446655440000/saldo
-```
-
-## ✨ Características de Event Sourcing
-
-- ✅ **Trazabilidad completa**: Todo cambio queda registrado
-- ✅ **Reconstrucción de estado**: Se puede recuperar cualquier estado anterior
-- ✅ **Auditoría integrada**: El historial de eventos es la auditoría
-- ✅ **Escalabilidad**: Fácil de paralelizar y distribuir
-
-## 🧪 Validaciones
-
-- El monto debe ser mayor a 0
-- No se permite retirar más dinero del disponible en la cuenta
-- Cada evento incrementa la versión de la cuenta
+---
+Generado por [iperezmx87](https://github.com/iperezmx87) - 2026
