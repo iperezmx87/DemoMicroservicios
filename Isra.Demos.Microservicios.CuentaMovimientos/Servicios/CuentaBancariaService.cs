@@ -12,18 +12,14 @@ namespace Isra.Demos.Microservicios.Servicios
     {
         private readonly IRepositorioEventos _repositorioEventos;
 
-        private readonly IColaMensajesService _colaMensajesService;
-
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="eventRepository"></param>
-        /// <param name="colaMensajesService"></param>
-        public CuentaBancariaService(IRepositorioEventos eventRepository,
-            IColaMensajesService colaMensajesService)
+        public CuentaBancariaService(
+            IRepositorioEventos eventRepository)
         {
             _repositorioEventos = eventRepository;
-            _colaMensajesService = colaMensajesService;
         }
 
         /// <summary>
@@ -54,16 +50,8 @@ namespace Isra.Demos.Microservicios.Servicios
             // Guardar los eventos generados
             foreach (var evento in cuenta.ObtenerEventos())
             {
+                // se almacena el evento en el repositorio de eventos
                 await _repositorioEventos.GuardarEventoAsync(evento);
-
-                await _colaMensajesService.PublicarDineroDepositadoEventoAsync(
-                    new DineroDepositadoEvento(
-                        evento.AggregateId,
-                        monto, evento.Version, propietario)
-                    {
-                        EventId = evento.EventId,
-                        OcurridoEn = evento.OcurridoEn
-                    });
             }
 
             cuenta.LimpiarEventos();
@@ -85,15 +73,6 @@ namespace Isra.Demos.Microservicios.Servicios
             foreach (var evento in cuenta.ObtenerEventos())
             {
                 await _repositorioEventos.GuardarEventoAsync(evento);
-
-                await _colaMensajesService.PublicarDineroRetiradoEventoAsync(
-                   new DineroRetiradoEvento(
-                       evento.AggregateId,
-                       monto, evento.Version, propietario)
-                   {
-                       EventId = evento.EventId,
-                       OcurridoEn = evento.OcurridoEn
-                   });
             }
 
             cuenta.LimpiarEventos();

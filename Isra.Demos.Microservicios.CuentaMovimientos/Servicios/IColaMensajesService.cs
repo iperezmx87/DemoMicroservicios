@@ -12,7 +12,7 @@ namespace Isra.Demos.Microservicios.Servicios
         /// </summary>
         /// <param name="evento"></param>
         /// <returns></returns>
-        Task PublicarDineroDepositadoEventoAsync(
+        Task<Tuple<string, string>> PublicarDineroDepositadoEventoAsync(
             DineroDepositadoEvento evento);
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace Isra.Demos.Microservicios.Servicios
         /// </summary>
         /// <param name="evento"></param>
         /// <returns></returns>
-        Task PublicarDineroRetiradoEventoAsync(
+        Task<Tuple<string, string>> PublicarDineroRetiradoEventoAsync(
             DineroRetiradoEvento evento);
     }
 }

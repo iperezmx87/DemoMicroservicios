@@ -1,3 +1,4 @@
+using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 using Isra.Demos.Microservicios.Modelo;
 
 namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
@@ -8,14 +9,21 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
     public class RepositorioEventos : IRepositorioEventos
     {
         private readonly IMongoCollection<EventoBase> _collection;
+        private readonly IMongoCollection<MensajeSalida> _collectionSalida;
+        private readonly IMongoClient _client;
 
         /// <summary>
         /// Repositorio de eventos en mongoDB. Este repositorio es responsable de almacenar y recuperar eventos que representan las acciones y cambios de estado en el sistema. Al implementar esta clase, se garantiza que los eventos se gestionen de manera consistente, permitiendo la reconstrucción del estado de los agregados a partir de los eventos almacenados. Además, este repositorio facilita la auditoría y el análisis de los eventos que han ocurrido en el sistema a lo largo del tiempo.
         /// </summary>
         /// <param name="database"></param>
-        public RepositorioEventos(IMongoDatabase database)
+        /// <param name="client"></param>
+        public RepositorioEventos(
+            IMongoDatabase database,
+            IMongoClient client)
         {
+            _client = client;
             _collection = database.GetCollection<EventoBase>(Constantes.EventStoreCollectionName);
+            _collectionSalida = database.GetCollection<MensajeSalida>(Constantes.CuentasMovimientosCollectionName);
         }
 
         /// <summary>
@@ -25,7 +33,42 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
         /// <returns></returns>
         public async Task GuardarEventoAsync(EventoBase evento)
         {
-            await _collection.InsertOneAsync(evento);
+            using var session = await _client.StartSessionAsync();
+            session.StartTransaction();
+
+            try
+            {
+                // almacena el evento nuevo
+                await _collection.InsertOneAsync(evento);
+
+                // guarda la tabla outbox
+                var outboxMessage = new MensajeSalida
+                {
+                    Topic = Constantes.KafkaTopic,
+                    Id = evento.EventId,
+                    OccurredOn = DateTime.UtcNow,
+                    Processed = false
+                };
+
+                // convertir el evento a transmitir
+                if (evento.TipoEvento == "DineroDepositadoEvento")
+                {
+                    outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((DineroDepositadoEvento)evento);
+                }
+                else
+                {
+                    outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((DineroRetiradoEvento)evento);
+                }
+
+                await _collectionSalida.InsertOneAsync(outboxMessage);
+
+                await session.CommitTransactionAsync();
+            }
+            catch (Exception)
+            {
+                await session.AbortTransactionAsync();
+                throw;
+            }
         }
 
         /// <summary>

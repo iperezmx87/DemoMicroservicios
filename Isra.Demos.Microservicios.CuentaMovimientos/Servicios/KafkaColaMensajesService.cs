@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using Isra.Demos.Microservicios.Modelo;
+using Microsoft.Extensions.Primitives;
 using System.Text.Json;
 
 namespace Isra.Demos.Microservicios.Servicios
@@ -30,12 +31,12 @@ namespace Isra.Demos.Microservicios.Servicios
         /// </summary>
         /// <param name="evento"></param>
         /// <returns></returns>
-        public async Task PublicarDineroDepositadoEventoAsync(
+        public async Task<Tuple<string, string>> PublicarDineroDepositadoEventoAsync(
             DineroDepositadoEvento evento)
         {
             var mensaje = JsonSerializer.Serialize(evento);
 
-            await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
+            return await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
         }
 
         /// <summary>
@@ -43,21 +44,24 @@ namespace Isra.Demos.Microservicios.Servicios
         /// </summary>
         /// <param name="evento"></param>
         /// <returns></returns>
-        public async Task PublicarDineroRetiradoEventoAsync(
+        public async Task<Tuple<string, string>> PublicarDineroRetiradoEventoAsync(
             DineroRetiradoEvento evento)
         {
             var mensaje = JsonSerializer.Serialize(evento);
 
-            await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
+            return await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
         }
 
-        private async Task PublicarEventoAsync(string llave, string mensaje)
+        private async Task<Tuple<string, string>> PublicarEventoAsync(string llave, string mensaje)
         {
-            await _producer.ProduceAsync(Constantes.KafkaTopic, new Message<string, string>
-            {
-                Key = llave,
-                Value = mensaje
-            });
+            var resultado =
+                 await _producer.ProduceAsync(Constantes.KafkaTopic, new Message<string, string>
+                 {
+                     Key = llave,
+                     Value = mensaje
+                 });
+
+            return Tuple.Create(resultado.Topic, Enum.GetName(resultado.Status));
         }
     }
 }

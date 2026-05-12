@@ -16,6 +16,11 @@
         public const string EventStoreDatabaseName = "bd_cuentas_movimientos";
 
         /// <summary>
+        /// Nombre de la colección en MongoDB donde se almacenarán los eventos de salida. Esta colección se utilizará para guardar todos los eventos relacionados con el Event Sourcing, permitiendo así la reconstrucción del estado de los agregados y el análisis histórico de las acciones realizadas en el sistema.
+        /// </summary>
+        public const string CuentasMovimientosCollectionName = "cuentas_movimientos_outbox";
+
+        /// <summary>
         /// Nombre de la colección en MongoDB donde se almacenarán los eventos. Esta colección se utilizará para guardar todos los eventos relacionados con el Event Sourcing, permitiendo así la reconstrucción del estado de los agregados y el análisis histórico de las acciones realizadas en el sistema.
         /// </summary>
         public const string EventStoreCollectionName = "cuentas_movimientos";
@@ -28,7 +33,7 @@
         /// <summary>
         /// Principal topico de Kafka donde se publicarán los eventos relacionados con las transacciones de cuenta.
         /// </summary>
-        public const string KafkaTopic = "cuentas_movimientos-eventos";
+        public const string KafkaTopic = "cuentas_movimientos_eventos";
 
         /// <summary>
         /// Cadena de conexión a PostgreSQL, en este caso se asume que PostgreSQL se está ejecutando localmente en el puerto 5432, con una base de datos llamada "BDMicroservicios" y credenciales de usuario "postgres" con contraseña "postgres". Esta cadena de conexión es fundamental para establecer la comunicación entre la aplicación y la base de datos PostgreSQL, permitiendo así el almacenamiento y recuperación de información relacionada con las transacciones de cuenta y otros datos relevantes para el funcionamiento del sistema. Al utilizar una cadena de conexión local, se facilita el desarrollo y las pruebas de la aplicación en un entorno controlado, aunque en un entorno de producción se recomendaría utilizar una configuración más robusta y segura para la conexión a la base de datos.
