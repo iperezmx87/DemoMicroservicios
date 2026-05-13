@@ -1,18 +1,28 @@
 # 🏦 Demo de Microservicios Bancarios - Event Sourcing & CQRS
 
-Este repositorio es una demostración técnica de una arquitectura de microservicios distribuida para la gestión de operaciones bancarias, implementada con **.NET 10** y orientada a eventos.
+Este repositorio es una demostración técnica de una arquitectura distribuida para la gestión de operaciones bancarias, construida con **.NET 10**. El sistema destaca por su enfoque en la consistencia de datos y la trazabilidad absoluta.
 
 ## 🏗️ Arquitectura y Patrones de Diseño
 
-El proyecto implementa una separación clara entre la escritura y la lectura de datos, garantizando alta escalabilidad y trazabilidad completa.
-
-
+El sistema utiliza una separación estricta entre la escritura (Commands) y la lectura (Queries), garantizando que las fallas en los reportes no afecten la integridad de las transacciones.
 
 ### Patrones Destacados:
-* **Event Sourcing:** El estado actual de una cuenta no se almacena directamente, sino que se reconstruye a partir de una secuencia inmutable de eventos almacenados en **MongoDB**.
-* **CQRS (Command Query Responsibility Segregation):** Separación de los modelos de comando (escritura) y consulta (lectura).
-* **Event-Driven Architecture:** Comunicación asíncrona entre servicios mediante **Apache Kafka**.
-* **Proyecciones de Lectura:** Transformación de eventos en tablas relacionales optimizadas para el usuario final.
+* **Event Sourcing:** La "verdad" del sistema reside en un historial inmutable de eventos en **MongoDB**.
+* **CQRS:** Modelos de datos independientes para optimizar la velocidad de escritura y la eficiencia de las consultas.
+* **Transactional Outbox:** Garantiza que cada cambio en la base de datos se publique en Kafka sin pérdida de mensajes, incluso ante fallas de red.
+* **Event-Driven Projections:** Los servicios de lectura (Saldo y Estado de Cuenta) reaccionan de forma coreografiada a los eventos del bus.
+
+
+
+---
+
+## 🛡️ Resiliencia y Consistencia (Garantía de Entrega)
+
+A diferencia de implementaciones simples, este proyecto resuelve el problema del "Dual Write" mediante el patrón **Outbox**:
+
+1. **Atomicidad:** Usamos **Transacciones de MongoDB** para asegurar que el evento y el mensaje pendiente se guarden como una única unidad de trabajo.
+2. **At-Least-Once Delivery:** Un Background Service (*Outbox Relay*) monitorea la colección y garantiza la publicación en Kafka.
+3. **Idempotencia:** Los consumidores (Postgres/SQL) están diseñados para ignorar mensajes duplicados basándose en la versión del evento.
 
 ---
 
@@ -20,55 +30,27 @@ El proyecto implementa una separación clara entre la escritura y la lectura de 
 
 | Capa | Tecnología |
 | :--- | :--- |
-| **Lenguaje / Runtime** | .NET 10 |
-| **Event Store (Escritura)** | MongoDB |
+| **Runtime** | .NET 10 |
+| **Event Store** | MongoDB (Replica Set para Transacciones) |
 | **Message Broker** | Apache Kafka |
-| **Proyección de Saldo** | PostgreSQL (Dapper) |
-| **Proyección de Historial** | SQL Server (Dapper) |
-| **Reporteo** | QuestPDF |
+| **Read Side (Saldo)** | PostgreSQL + Dapper |
+| **Read Side (Reportes)** | SQL Server + Dapper |
+| **PDF Engine** | QuestPDF |
 
 ---
 
-## 🚀 Flujo de Operaciones
+## 🚀 Flujo del Sistema
 
-1.  **Comando:** El usuario envía una operación (Depósito/Retiro) a la Web API.
-2.  **Persistencia de Evento:** El servicio valida la regla de negocio y persiste el evento en **MongoDB**.
-3.  **Publicación:** El evento se publica en un tópico de **Kafka**.
-4.  **Consumo y Proyección:**
-    * **Microservicio de Saldo:** Escucha el evento y actualiza atómicamente el balance en **PostgreSQL**.
-    * **Microservicio de Estado de Cuenta:** Registra el movimiento en **SQL Server** para auditoría.
-5.  **Consulta:** El front-end consulta el saldo o descarga un **PDF** profesional generado bajo demanda desde las proyecciones de lectura.
+1. **Command:** La API recibe una transacción y la persiste en el EventStore + Outbox (Mongo).
+2. **Relay:** El `OutboxPublisherService` detecta el mensaje y lo entrega a **Kafka**.
+3. **Proyección de Saldo:** El consumidor actualiza el balance en tiempo real en **Postgres**.
+4. **Proyección de Historial:** El consumidor registra el movimiento en **SQL Server**.
+5. **Query:** La Web API expone los datos y genera estados de cuenta bancarios en PDF con formato profesional.
 
 ---
 
-## 📂 Estructura de la Solución
+## 📋 Requisitos de Ejecución
 
-* `Isra.Demos.Microservicios.Modelo`: Librería de clases con el Agregado de Dominio y los Contratos de Eventos.
-* `Isra.Demos.Microservicios.CuentaMovimientos`: Servicio de comandos (Write Side) encargado de la lógica de negocio.
-* `Isra.Demos.Microservicios.Saldo`: Background Service que proyecta el saldo actual en **Postgres**.
-* `Isra.Demos.Microservicios.EstadoCuenta`: Background Service que gestiona el historial en **SQL Server** y genera reportes PDF.
-* `Isra.Demos.Microservicios.WebApi`: Gateway de consulta que expone los endpoints para el Front-end.
-
----
-
-## 📋 Requisitos y Ejecución
-
-1.  Levantar infraestructura mediante Docker:
-    ```bash
-    docker-compose up -d
-    ```
-    *(Asegúrate de tener instancias de Mongo, Kafka, Postgres y SQL Server listas)*.
-2.  Ejecutar la solución desde Visual Studio o vía CLI:
-    ```bash
-    dotnet run --project Isra.Demos.Microservicios.WebApi
-    ```
-
----
-
-## ✨ Características Especiales
-* **Idempotencia:** Garantizada mediante el control de versiones de eventos.
-* **Resiliencia:** Manejo de reintentos en el consumo de mensajes.
-* **Reportes Profesionales:** Generación de estados de cuenta con diseño bancario y soporte multimoneda.
-
----
-Generado por [iperezmx87](https://github.com/iperezmx87) - 2026
+1. **Infraestructura:** Levantar el entorno con Docker:
+   ```bash
+   docker-compose up -d
