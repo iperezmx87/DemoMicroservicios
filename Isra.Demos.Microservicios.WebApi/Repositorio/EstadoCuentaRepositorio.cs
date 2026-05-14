@@ -12,6 +12,7 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
     public class EstadoCuentaRepositorio : IEstadoCuentaRepositorio
     {
         private readonly string _connecionString;
+        private readonly string _cnnTblUsuarios;
         private readonly ISaldoRepositorio _saldoRepositorio;
 
         /// <summary>
@@ -20,6 +21,7 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
         public EstadoCuentaRepositorio(ISaldoRepositorio saldoRepositorio)
         {
             _connecionString = Constantes.SQLServerConnectionString;
+            _cnnTblUsuarios = Constantes.SqlServerBancoCuentasConnectionString;
             _saldoRepositorio = saldoRepositorio;
         }
 
@@ -34,12 +36,8 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
 
             await connection.OpenAsync();
 
-            CuentaDto cuenta = new CuentaDto
-            {
-                AggregateId = aggregateId,
-                Propietario = string.Empty,
-                Saldo = 0
-            };
+            // obtener los datos de la tabla TblCuentasUsuario
+            var cuentaUsuario = await ObtenerCuentaAsync(aggregateId);
 
             // obtiene los movimientos de la cuenta
             var movimientos =
@@ -50,16 +48,32 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
             if (movimientos.Any())
             {
                 // cargar el saldo
-                cuenta.Saldo = await _saldoRepositorio.GetSaldoActualAsync(aggregateId);
-
-                // propietario
-                cuenta.Propietario = movimientos.First().Propietario;
+                cuentaUsuario.Saldo = await _saldoRepositorio.GetSaldoActualAsync(aggregateId);
 
                 // movimientos
-                cuenta.Movimientos = movimientos.ToArray();
+                cuentaUsuario.Movimientos = movimientos.ToArray();
             }
 
-            return cuenta;
+            return cuentaUsuario;
+        }
+
+        /// <summary>
+        /// Obtiene los datos de la cuenta
+        /// </summary>
+        /// <param name="aggregateId"></param>
+        /// <returns></returns>
+        private async Task<CuentaDto> ObtenerCuentaAsync(Guid aggregateId)
+        {
+            using var connection = new SqlConnection(_cnnTblUsuarios);
+
+            await connection.OpenAsync();
+
+            // obtener los datos de la tabla TblCuentasUsuario
+            var cuentaUsuario = await connection.QueryFirstOrDefaultAsync<CuentaDto>(
+                "SELECT IdCuenta AggregateId, Propietario FROM TblCuentasUsuario WHERE IdCuenta = @AggregateId",
+                new { AggregateId = aggregateId });
+
+            return cuentaUsuario;
         }
     }
 }
