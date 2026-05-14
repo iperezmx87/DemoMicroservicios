@@ -13,4 +13,7 @@
     <Project Path="Isra.Demos.Microservicios.Saldo/Isra.Demos.Microservicios.Saldo.csproj" />
   </Folder>
   <Folder Name="/Pruebas/" />
+  <Folder Name="/Usuarios y cuentas/">
+    <Project Path="Isra.Demos.Microservicios.UsuariosCuentas/Isra.Demos.Microservicios.UsuariosCuentas.csproj" Id="a04f0591-4251-49ab-8d96-39f983e6bb84" />
+  </Folder>
 </Solution>

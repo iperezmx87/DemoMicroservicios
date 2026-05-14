@@ -23,23 +23,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
         }
 
         /// <summary>
-        /// Crear una nueva cuenta bancaria
-        /// </summary>
-        [HttpPost("crear")]
-        public async Task<ActionResult<object>> CrearCuenta([FromBody] CrearCuentaRequest request)
-        {
-            try
-            {
-                await _cuentaService.CrearCuentaAsync(request.CuentaId);
-                return Ok(new { mensaje = "Cuenta creada exitosamente", cuentaId = request.CuentaId });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
-
-        /// <summary>
         /// Depositar dinero en una cuenta
         /// </summary>
         [HttpPost("{cuentaId:guid}/depositar")]

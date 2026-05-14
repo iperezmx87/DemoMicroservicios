@@ -8,13 +8,6 @@ namespace Isra.Demos.Microservicios.Servicios
     public interface ICuentaBancariaService
     {
         /// <summary>
-        /// Crea la cuenta bancaria. Este método es responsable de inicializar una nueva cuenta bancaria en el sistema. Al crear una cuenta, se establece un identificador único para la cuenta y se prepara para recibir eventos relacionados con las operaciones que se realizarán en ella, como depósitos y retiros. La creación de la cuenta es el primer paso para permitir a los usuarios interactuar con sus cuentas banc
-        /// </summary>
-        /// <param name="cuentaId"></param>
-        /// <returns></returns>
-        Task CrearCuentaAsync(Guid cuentaId);
-
-        /// <summary>
         /// Deposita dinero en la cuenta
         /// </summary>
         /// <param name="cuentaId"></param>

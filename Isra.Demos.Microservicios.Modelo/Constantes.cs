@@ -44,5 +44,10 @@
         /// Cadena de conexión a SQL Server, en este caso se asume que SQL Server se está ejecutando localmente en el puerto 1433, con una base de datos llamada "BDESTADOCUENTAS" y credenciales de usuario "sa" con contraseña "Saucedo870824". Esta cadena de conexión es fundamental para establecer la comunicación entre la aplicación y la base de datos SQL Server, permitiendo así el almacenamiento y recuperación de información relacionada con las transacciones de cuenta y otros datos relevantes para el funcionamiento del sistema. Al utilizar una cadena de conexión local, se facilita el desarrollo y las pruebas de la aplicación en un entorno controlado, aunque en un entorno de producción se recomendaría utilizar una configuración más robusta y segura para la conexión a la base de datos.
         /// </summary>
         public const string SQLServerConnectionString = "Server=.\\SQLEXPRESS;Database=BDESTADOCUENTA;user id=sa;password=Saucedo870824;TrustServerCertificate=True;";
+
+        /// <summary>
+        /// Cadena de conexión a SQL Server para la base de datos de cuentas, en este caso se asume que SQL Server se está ejecutando localmente en el puerto 1433, con una base de datos llamada "BDBANCOCUENTAS" y credenciales de usuario "sa" con contraseña "Saucedo870824". Esta cadena de conexión es fundamental para establecer la comunicación entre la aplicación y la base de datos SQL Server, permitiendo así el almacenamiento y recuperación de información relacionada con las cuentas bancarias y otros datos relevantes para el funcionamiento del sistema. Al utilizar una cadena de conexión local, se facilita el desarrollo y las pruebas de la aplicación en un entorno controlado, aunque en un entorno de producción se recomendaría utilizar una configuración más robusta y segura para la conexión a la base de datos.
+        /// </summary>
+        public const string SqlServerBancoCuentasConnectionString = "Server=.\\SQLEXPRESS;Database=BDBANCOCUENTAS;user id=sa;password=Saucedo870824;TrustServerCertificate=True;";
     }
 }

@@ -23,19 +23,6 @@ namespace Isra.Demos.Microservicios.Servicios
         }
 
         /// <summary>
-        /// Crea la cuenta
-        /// </summary>
-        /// <param name="cuentaId"></param>
-        /// <returns></returns>
-        public async Task CrearCuentaAsync(Guid cuentaId)
-        {
-            var cuenta = new CuentaBancaria(cuentaId);
-
-            // Una cuenta nueva no tiene eventos iniciales
-            await Task.CompletedTask;
-        }
-
-        /// <summary>
         /// Depositar un dinero
         /// </summary>
         /// <param name="cuentaId"></param>
