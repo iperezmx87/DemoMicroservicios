@@ -3,6 +3,18 @@ using Isra.Demos.Microservicios.UsuariosCuentas.Servicio;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuración de CORS para permitir al frontend conectarse
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // Add services to the container.
 builder.Services.AddScoped<ICuentaServicio, CuentaServicio>();
 builder.Services.AddScoped<ICuentaRepositorio, CuentaRepositorio>();
@@ -22,6 +34,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
 

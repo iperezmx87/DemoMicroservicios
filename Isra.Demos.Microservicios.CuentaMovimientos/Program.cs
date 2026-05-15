@@ -9,10 +9,21 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuración de CORS para permitir al frontend conectarse
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-
 
 var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
@@ -66,11 +77,10 @@ if (app.Environment.EnvironmentName == "Development")
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowFrontend");
+
+app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
 
 app.MapControllers();
 

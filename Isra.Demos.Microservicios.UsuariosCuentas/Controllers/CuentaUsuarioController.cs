@@ -104,7 +104,8 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
                 {
                     new Claim(ClaimTypes.NameIdentifier, cuenta.Id.ToString()),
                     new Claim(ClaimTypes.Name, cuenta.Usuario),
-                    new Claim("IdCuenta", cuenta.IdCuenta.ToString())
+                    new Claim("IdCuenta", cuenta.IdCuenta.ToString()),
+                    new Claim("Propietario", cuenta.Propietario ?? "")
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 Issuer = _config["Jwt:Issuer"],
