@@ -1,4 +1,4 @@
-﻿using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
+using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
 
 namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
 {
@@ -18,5 +18,12 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
 
         //Task ActualizarCuentaAsync(Cuenta cuenta);
         //Task EliminarCuentaAsync(Guid id);
+
+        /// <summary>
+        /// Verifica si existe un usuario con el mismo nombre.
+        /// </summary>
+        /// <param name="usuario"></param>
+        /// <returns></returns>
+        Task<bool> ExisteUsuarioAsync(string usuario);
     }
 }

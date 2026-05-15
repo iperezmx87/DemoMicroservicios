@@ -20,6 +20,13 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 2.  **At-Least-Once Delivery:** Un servicio en segundo plano (`OutboxPublisherService`) actúa como relay, monitoreando la colección y garantizando la entrega a **Kafka**.
 3.  **Idempotencia:** Los consumidores en el lado de lectura (PostgreSQL y SQL Server) están diseñados para procesar mensajes basándose en la versión del evento, evitando inconsistencias por duplicidad.
 
+## ✨ Funcionalidades Clave
+
+*   **Gestión Integral de Cuentas:** Capacidad para crear usuarios con validación estricta de unicidad en base de datos relacional antes de la emisión de eventos de dominio.
+*   **Transacciones Atómicas Complejas:** Soporte para depósitos, retiros y **transferencias** entre cuentas. Las transferencias generan múltiples eventos (`DineroRetiradoEvento` y `DineroDepositadoEvento`) asegurando la consistencia en el Event Sourcing bajo una sola operación de servicio.
+*   **Proyección de Saldos en Tiempo Real:** Actualización inmediata de los balances en bases de datos de lectura optimizadas.
+*   **Generación de Estados de Cuenta:** Extracción del historial proyectado y exportación a PDFs profesionales utilizando QuestPDF.
+
 ## 🛠️ Stack Tecnológico
 
 | Capa | Tecnología |
@@ -29,6 +36,7 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 | **Message Broker** | Apache Kafka |
 | **Read Side (Saldo)** | PostgreSQL + Dapper |
 | **Read Side (Reportes)** | SQL Server + Dapper |
+| **Gestión de Usuarios** | SQL Server + Dapper |
 | **Generación de Documentos** | QuestPDF |
 
 ## 🚀 Flujo del Sistema
@@ -42,11 +50,11 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 ## 📁 Estructura del Proyecto
 
 * **`Isra.Demos.Microservicios.WebApi`**: Punto de entrada y gestión de Comandos.
-* **`Isra.Demos.Microservicios.CuentaMovimientos`**: Gestión del flujo de movimientos bancarios.
+* **`Isra.Demos.Microservicios.CuentaMovimientos`**: Gestión del flujo de movimientos bancarios **(Depósitos, Retiros y Transferencias)** mediante Event Sourcing.
 * **`Isra.Demos.Microservicios.Saldo`**: Microservicio encargado de la proyección y consulta de saldos actuales.
 * **`Isra.Demos.Microservicios.EstadoCuenta`**: Servicio especializado en la generación de reportes y documentos.
 * **`Isra.Demos.Microservicios.Modelo`**: Biblioteca de clases compartida y definiciones de dominio.
-* **`Isra.Demos.Microservicios.UsuariosCuentas`**: Api de entrada que crea las cuentas de usuario y asigna una cuenta bancaria para las operaciones
+* **`Isra.Demos.Microservicios.UsuariosCuentas`**: API de entrada que gestiona identidades, **valida la unicidad de usuarios en base de datos relacional** y asigna una cuenta bancaria inicial.
 
 ## 📋 Requisitos e Instalación
 

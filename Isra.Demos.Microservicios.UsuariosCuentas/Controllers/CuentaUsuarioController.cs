@@ -1,4 +1,4 @@
-﻿using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
+using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
 using Isra.Demos.Microservicios.UsuariosCuentas.Servicio;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,19 +43,30 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
             cuenta.FechaHoraModificacion = DateTimeOffset.UtcNow;
             cuenta.Estatus = 1; // activo
 
-            var resultado = await _cuentaServicio.CrearCuentaAsync(cuenta);
-
-            if (!resultado)
+            try
             {
-                return StatusCode(500);
+                var resultado = await _cuentaServicio.CrearCuentaAsync(cuenta);
+
+                if (!resultado)
+                {
+                    return StatusCode(500);
+                }
+
+                return Ok(new
+                {
+                    Success = true,
+                    Mensaje = "Cuenta creada exitosamente",
+                    cuenta.IdCuenta
+                });
             }
-
-            return Ok(new
+            catch (InvalidOperationException ex)
             {
-                Success = true,
-                Mensaje = "Cuenta creada exitosamente",
-                cuenta.IdCuenta
-            });
+                return BadRequest(new
+                {
+                    Success = false,
+                    Error = ex.Message
+                });
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Isra.Demos.Microservicios.Modelo;
 using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
 using Microsoft.Data.SqlClient;
@@ -56,6 +56,20 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
             }, commandType: CommandType.Text);
 
             return true;
+        }
+
+        /// <summary>
+        /// Verifica si existe el nombre de usuario
+        /// </summary>
+        public async Task<bool> ExisteUsuarioAsync(string usuario)
+        {
+            using var cnn = new SqlConnection(_connectionString);
+            await cnn.OpenAsync();
+            var count = await cnn.ExecuteScalarAsync<int>(
+                "SELECT COUNT(1) FROM [dbo].[TblCuentasUsuario] WHERE Usuario = @Usuario", 
+                new { Usuario = usuario }
+            );
+            return count > 0;
         }
     }
 }

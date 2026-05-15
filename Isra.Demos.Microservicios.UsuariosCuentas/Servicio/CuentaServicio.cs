@@ -1,4 +1,4 @@
-﻿using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
+using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
 using Isra.Demos.Microservicios.UsuariosCuentas.Repositorio;
 
 namespace Isra.Demos.Microservicios.UsuariosCuentas.Servicio
@@ -27,6 +27,12 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Servicio
         /// <returns></returns>
         public async Task<bool> CrearCuentaAsync(CuentaUsuario cuenta)
         {
+            // Validar que el usuario sea único
+            if (await _cuentaRepositorio.ExisteUsuarioAsync(cuenta.Usuario))
+            {
+                throw new InvalidOperationException($"El usuario '{cuenta.Usuario}' ya existe. Por favor elija uno diferente.");
+            }
+
             // almacena primero la cuenta del usuario
             return await _cuentaRepositorio.CrearCuentaAsync(cuenta);
         }
