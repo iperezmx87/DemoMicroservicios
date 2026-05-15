@@ -46,6 +46,7 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 * **`Isra.Demos.Microservicios.Saldo`**: Microservicio encargado de la proyección y consulta de saldos actuales.
 * **`Isra.Demos.Microservicios.EstadoCuenta`**: Servicio especializado en la generación de reportes y documentos.
 * **`Isra.Demos.Microservicios.Modelo`**: Biblioteca de clases compartida y definiciones de dominio.
+* **`Isra.Demos.Microservicios.UsuariosCuentas`**: Api de entrada que crea las cuentas de usuario y asigna una cuenta bancaria para las operaciones
 
 ## 📋 Requisitos e Instalación
 
