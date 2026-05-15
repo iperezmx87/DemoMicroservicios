@@ -1,5 +1,6 @@
 using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 using Isra.Demos.Microservicios.Servicios;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
@@ -9,6 +10,7 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CuentasController : ControllerBase
     {
         private readonly ICuentaBancariaService _cuentaService;

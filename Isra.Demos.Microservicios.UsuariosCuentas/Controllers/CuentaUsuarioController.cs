@@ -1,6 +1,10 @@
 using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
 using Isra.Demos.Microservicios.UsuariosCuentas.Servicio;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text;
 
 namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
 {
@@ -12,15 +16,18 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
     public class CuentaUsuarioController : ControllerBase
     {
         private readonly ICuentaServicio _cuentaServicio;
+        private readonly IConfiguration _config;
         //private readonly ICuentaRepositorio _cuentaRepositorio;
 
         ///// <summary>
         ///// Constructor de la clase CuentaUsuarioController, que recibe una instancia de ICuentaRepositorio a través de la inyección de dependencias. Esta instancia se utiliza para interactuar con el repositorio de cuentas de usuario y realizar las operaciones necesarias para manejar las solicitudes HTTP relacionadas con las cuentas de usuario. Al utilizar la inyección de dependencias, se facilita la gestión de las dependencias y se promueve un diseño más modular y mantenible del código.
         ///// </summary>
         ///<param name="cuentaServicio"></param>
-        public CuentaUsuarioController(ICuentaServicio cuentaServicio)
+        ///<param name="config"></param>
+        public CuentaUsuarioController(ICuentaServicio cuentaServicio, IConfiguration config)
         {
             _cuentaServicio = cuentaServicio;
+            _config = config;
         }
 
         /// <summary>
@@ -67,6 +74,51 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
                     Error = ex.Message
                 });
             }
+        }
+
+        /// <summary>
+        /// Iniciar sesión
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Usuario) || string.IsNullOrWhiteSpace(request.Secreto))
+            {
+                return BadRequest(new { Success = false, Mensaje = "Datos de inicio de sesión inválidos" });
+            }
+
+            var cuenta = await _cuentaServicio.ValidarCredencialesAsync(request.Usuario, request.Secreto);
+
+            if (cuenta == null)
+            {
+                return Unauthorized(new { Success = false, Mensaje = "Credenciales incorrectas" });
+            }
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, cuenta.Id.ToString()),
+                    new Claim(ClaimTypes.Name, cuenta.Usuario),
+                    new Claim("IdCuenta", cuenta.IdCuenta.ToString())
+                }),
+                Expires = DateTime.UtcNow.AddHours(1),
+                Issuer = _config["Jwt:Issuer"],
+                Audience = _config["Jwt:Audience"],
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return Ok(new
+            {
+                Success = true,
+                Token = tokenHandler.WriteToken(token)
+            });
         }
     }
 }

@@ -36,5 +36,13 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Servicio
             // almacena primero la cuenta del usuario
             return await _cuentaRepositorio.CrearCuentaAsync(cuenta);
         }
+
+        /// <summary>
+        /// Validar credenciales de usuario
+        /// </summary>
+        public async Task<CuentaUsuario> ValidarCredencialesAsync(string usuario, string secreto)
+        {
+            return await _cuentaRepositorio.ObtenerCuentaPorCredencialesAsync(usuario, secreto);
+        }
     }
 }

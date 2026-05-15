@@ -1,4 +1,5 @@
-﻿using Isra.Demos.Microservicios.WebApi.Contratos;
+using Isra.Demos.Microservicios.WebApi.Contratos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Isra.Demos.Microservicios.WebApi.Controllers
@@ -8,6 +9,7 @@ namespace Isra.Demos.Microservicios.WebApi.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CuentaController : ControllerBase
     {
         private readonly ISaldoRepositorio _saldoRepositorio;

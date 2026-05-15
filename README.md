@@ -22,6 +22,7 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 
 ## ✨ Funcionalidades Clave
 
+*   **Autenticación y Seguridad:** Implementación de inicio de sesión seguro con tokens JWT (JSON Web Tokens) en el servicio `UsuariosCuentas`, protegiendo de esta manera el acceso a los endpoints restringidos del ecosistema (`WebApi`). *[Características desarrolladas junto a Antigravity (IA de Google DeepMind)]*
 *   **Gestión Integral de Cuentas:** Capacidad para crear usuarios con validación estricta de unicidad en base de datos relacional antes de la emisión de eventos de dominio.
 *   **Transacciones Atómicas Complejas:** Soporte para depósitos, retiros y **transferencias** entre cuentas. Las transferencias generan múltiples eventos (`DineroRetiradoEvento` y `DineroDepositadoEvento`) asegurando la consistencia en el Event Sourcing bajo una sola operación de servicio.
 *   **Proyección de Saldos en Tiempo Real:** Actualización inmediata de los balances en bases de datos de lectura optimizadas.
@@ -54,7 +55,7 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 * **`Isra.Demos.Microservicios.Saldo`**: Microservicio encargado de la proyección y consulta de saldos actuales.
 * **`Isra.Demos.Microservicios.EstadoCuenta`**: Servicio especializado en la generación de reportes y documentos.
 * **`Isra.Demos.Microservicios.Modelo`**: Biblioteca de clases compartida y definiciones de dominio.
-* **`Isra.Demos.Microservicios.UsuariosCuentas`**: API de entrada que gestiona identidades, **valida la unicidad de usuarios en base de datos relacional** y asigna una cuenta bancaria inicial.
+* **`Isra.Demos.Microservicios.UsuariosCuentas`**: API de entrada que gestiona identidades, **valida la unicidad de usuarios en base de datos relacional**, asigna una cuenta bancaria inicial, y **gestiona el flujo de inicio de sesión entregando tokens JWT**.
 
 ## 📋 Requisitos e Instalación
 

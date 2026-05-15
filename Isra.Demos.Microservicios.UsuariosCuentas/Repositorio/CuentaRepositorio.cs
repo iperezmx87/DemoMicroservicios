@@ -71,5 +71,18 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
             );
             return count > 0;
         }
+
+        /// <summary>
+        /// Obtiene una cuenta de usuario por sus credenciales
+        /// </summary>
+        public async Task<CuentaUsuario> ObtenerCuentaPorCredencialesAsync(string usuario, string secreto)
+        {
+            using var cnn = new SqlConnection(_connectionString);
+            await cnn.OpenAsync();
+            return await cnn.QueryFirstOrDefaultAsync<CuentaUsuario>(
+                "SELECT * FROM [dbo].[TblCuentasUsuario] WHERE Usuario = @Usuario AND Secreto = @Secreto AND Estatus = 1",
+                new { Usuario = usuario, Secreto = secreto }
+            );
+        }
     }
 }

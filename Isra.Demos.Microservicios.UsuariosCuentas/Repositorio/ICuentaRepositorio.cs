@@ -25,5 +25,13 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
         /// <param name="usuario"></param>
         /// <returns></returns>
         Task<bool> ExisteUsuarioAsync(string usuario);
+
+        /// <summary>
+        /// Obtiene una cuenta de usuario por sus credenciales.
+        /// </summary>
+        /// <param name="usuario"></param>
+        /// <param name="secreto"></param>
+        /// <returns></returns>
+        Task<CuentaUsuario> ObtenerCuentaPorCredencialesAsync(string usuario, string secreto);
     }
 }

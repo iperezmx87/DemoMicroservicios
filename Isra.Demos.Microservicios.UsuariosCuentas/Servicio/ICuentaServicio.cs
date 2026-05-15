@@ -1,4 +1,4 @@
-﻿using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
+using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
 
 namespace Isra.Demos.Microservicios.UsuariosCuentas.Servicio
 {
@@ -13,5 +13,13 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Servicio
         /// <param name="cuenta"></param>
         /// <returns></returns>
         Task<bool> CrearCuentaAsync(CuentaUsuario cuenta);
+
+        /// <summary>
+        /// Validar las credenciales de un usuario
+        /// </summary>
+        /// <param name="usuario"></param>
+        /// <param name="secreto"></param>
+        /// <returns></returns>
+        Task<CuentaUsuario> ValidarCredencialesAsync(string usuario, string secreto);
     }
 }
