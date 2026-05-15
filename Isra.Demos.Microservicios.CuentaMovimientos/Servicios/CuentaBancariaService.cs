@@ -82,5 +82,41 @@ namespace Isra.Demos.Microservicios.Servicios
 
             return cuenta;
         }
+
+        /// <summary>
+        /// Transfiere dinero de una cuenta a otra
+        /// </summary>
+        /// <param name="cuentaOrigenId"></param>
+        /// <param name="cuentaDestinoId"></param>
+        /// <param name="monto"></param>
+        /// <param name="propietarioOrigen"></param>
+        /// <param name="propietarioDestino"></param>
+        /// <returns></returns>
+        public async Task TransferirAsync(Guid cuentaOrigenId, Guid cuentaDestinoId, decimal monto, string propietarioOrigen, string propietarioDestino)
+        {
+            var cuentaOrigen = await ObtenerCuentaAsync(cuentaOrigenId);
+            var cuentaDestino = await ObtenerCuentaAsync(cuentaDestinoId);
+
+            if (cuentaOrigen.Version == 0)
+                throw new ArgumentException("La cuenta de origen no existe o no ha sido inicializada.");
+                
+            if (cuentaDestino.Version == 0)
+                throw new ArgumentException("La cuenta destino no existe o no ha sido inicializada.");
+
+            cuentaOrigen.Retirar(monto, propietarioOrigen);
+            cuentaDestino.Depositar(monto, propietarioDestino ?? cuentaDestino.Propietario);
+
+            foreach (var evento in cuentaOrigen.ObtenerEventos())
+            {
+                await _repositorioEventos.GuardarEventoAsync(evento);
+            }
+            cuentaOrigen.LimpiarEventos();
+
+            foreach (var evento in cuentaDestino.ObtenerEventos())
+            {
+                await _repositorioEventos.GuardarEventoAsync(evento);
+            }
+            cuentaDestino.LimpiarEventos();
+        }
     }
 }

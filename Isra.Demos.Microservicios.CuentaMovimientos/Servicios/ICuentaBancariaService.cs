@@ -1,4 +1,4 @@
-﻿using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
+using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 
 namespace Isra.Demos.Microservicios.Servicios
 {
@@ -31,5 +31,16 @@ namespace Isra.Demos.Microservicios.Servicios
         /// <param name="cuentaId"></param>
         /// <returns></returns>
         Task<CuentaBancaria> ObtenerCuentaAsync(Guid cuentaId);
+
+        /// <summary>
+        /// Transfiere dinero de una cuenta origen a una cuenta destino.
+        /// </summary>
+        /// <param name="cuentaOrigenId"></param>
+        /// <param name="cuentaDestinoId"></param>
+        /// <param name="monto"></param>
+        /// <param name="propietarioOrigen"></param>
+        /// <param name="propietarioDestino"></param>
+        /// <returns></returns>
+        Task TransferirAsync(Guid cuentaOrigenId, Guid cuentaDestinoId, decimal monto, string propietarioOrigen, string propietarioDestino);
     }
 }

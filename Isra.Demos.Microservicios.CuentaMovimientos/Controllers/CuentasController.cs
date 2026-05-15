@@ -81,5 +81,45 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Transferir dinero entre dos cuentas
+        /// </summary>
+        [HttpPost("transferir")]
+        public async Task<ActionResult<object>> Transferir([FromBody] TransferenciaRequest request)
+        {
+            try
+            {
+                await _cuentaService.TransferirAsync(
+                    request.CuentaOrigenId, 
+                    request.CuentaDestinoId, 
+                    request.Monto, 
+                    request.PropietarioOrigen, 
+                    request.PropietarioDestino
+                );
+
+                var cuentaOrigen = await _cuentaService.ObtenerCuentaAsync(request.CuentaOrigenId);
+                
+                return Ok(new
+                {
+                    mensaje = "Transferencia realizada exitosamente",
+                    cuentaOrigenId = request.CuentaOrigenId,
+                    saldoActualOrigen = cuentaOrigen.Saldo,
+                    cuentaDestinoId = request.CuentaDestinoId
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
     }
 }
