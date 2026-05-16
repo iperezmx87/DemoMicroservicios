@@ -26,7 +26,7 @@
 		<ContainerRepository>pesimx87/isra-microservicios-web-api</ContainerRepository>
 		<ContainerImageTag>1.1.0</ContainerImageTag>
 		<ContainerRegistry>docker.io</ContainerRegistry>
-		<ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0-alpine</ContainerBaseImage>
+		<ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0</ContainerBaseImage>
 		<ContainerPort>8074</ContainerPort>
 	</PropertyGroup>
 
