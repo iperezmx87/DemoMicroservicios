@@ -33,6 +33,9 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Servicio
                 throw new InvalidOperationException($"El usuario '{cuenta.Usuario}' ya existe. Por favor elija uno diferente.");
             }
 
+            // Hashear la contraseña antes de guardarla
+            cuenta.Secreto = BCrypt.Net.BCrypt.HashPassword(cuenta.Secreto);
+
             // almacena primero la cuenta del usuario
             return await _cuentaRepositorio.CrearCuentaAsync(cuenta);
         }
@@ -42,7 +45,14 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Servicio
         /// </summary>
         public async Task<CuentaUsuario> ValidarCredencialesAsync(string usuario, string secreto)
         {
-            return await _cuentaRepositorio.ObtenerCuentaPorCredencialesAsync(usuario, secreto);
+            var cuenta = await _cuentaRepositorio.ObtenerCuentaPorUsuarioAsync(usuario);
+
+            if (cuenta != null && BCrypt.Net.BCrypt.Verify(secreto, cuenta.Secreto))
+            {
+                return cuenta;
+            }
+
+            return null;
         }
     }
 }

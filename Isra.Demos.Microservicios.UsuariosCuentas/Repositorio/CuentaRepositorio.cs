@@ -73,15 +73,15 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
         }
 
         /// <summary>
-        /// Obtiene una cuenta de usuario por sus credenciales
+        /// Obtiene una cuenta de usuario por su nombre de usuario.
         /// </summary>
-        public async Task<CuentaUsuario> ObtenerCuentaPorCredencialesAsync(string usuario, string secreto)
+        public async Task<CuentaUsuario> ObtenerCuentaPorUsuarioAsync(string usuario)
         {
             using var cnn = new SqlConnection(_connectionString);
             await cnn.OpenAsync();
             return await cnn.QueryFirstOrDefaultAsync<CuentaUsuario>(
-                "SELECT * FROM [dbo].[TblCuentasUsuario] WHERE Usuario = @Usuario AND Secreto = @Secreto AND Estatus = 1",
-                new { Usuario = usuario, Secreto = secreto }
+                "SELECT * FROM [dbo].[TblCuentasUsuario] WHERE Usuario = @Usuario AND Estatus = 1",
+                new { Usuario = usuario }
             );
         }
     }

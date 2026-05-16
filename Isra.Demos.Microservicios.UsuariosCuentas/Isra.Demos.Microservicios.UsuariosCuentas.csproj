@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
 		<PackageReference Include="Dapper" Version="2.1.72" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.4" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
@@ -16,6 +17,23 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Isra.Demos.Microservicios.Modelo\Isra.Demos.Microservicios.Modelo.csproj" />
+	</ItemGroup>
+
+	<!-- Configuración de empaquetado para docker -->
+	<PropertyGroup>
+		<RootNamespace>Isra.Demos.Microservicios.UsuariosCuentas</RootNamespace>
+		<ContainerRepository>pesimx87/isra-microservicios-usuarios-cuentas</ContainerRepository>
+		<ContainerImageTag>1.1.0</ContainerImageTag>
+		<ContainerRegistry>docker.io</ContainerRegistry>
+		<ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0-alpine</ContainerBaseImage>
+		<ContainerPort>8071</ContainerPort>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ContainerEnvironmentVariable Include="ASPNETCORE_ENVIRONMENT" Value="Development" />
+
+		<!-- Añadir Labels (Metadatos de la imagen) -->
+		<ContainerLabel Include="maintainer" Value="isra.saucedo50@outlook.com" />
 	</ItemGroup>
 
 </Project>
