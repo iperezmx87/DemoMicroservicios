@@ -23,7 +23,7 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 ## ✨ Funcionalidades Clave
 
 *   **Autenticación y Seguridad:** Implementación de inicio de sesión seguro con tokens JWT (JSON Web Tokens) en el servicio `UsuariosCuentas`, protegiendo de esta manera el acceso a los endpoints restringidos del ecosistema (`WebApi`). *[Características desarrolladas junto a Antigravity (IA de Google DeepMind)]*
-*   **Portal Web Bancario:** Desarrollo de una Single Page Application (SPA) responsiva con React.js y Vite, utilizando **Material Design (MUI)**. El portal integra el flujo de inicio de sesión seguro, despliegue del Dashboard con saldo actual, visualización de movimientos, realización de transferencias y descarga directa de estados de cuenta PDF. *[Capa Frontend diseñada, planificada y construida en su totalidad junto a Antigravity (IA de Google DeepMind)]*
+*   **Portal Web Bancario:** Revisa las ramas del repositorio para revisar las diferentes implementaciones de front end.
 *   **Gestión Integral de Cuentas:** Capacidad para crear usuarios con validación estricta de unicidad en base de datos relacional antes de la emisión de eventos de dominio.
 *   **Transacciones Atómicas Complejas:** Soporte para depósitos, retiros y **transferencias** entre cuentas. Las transferencias generan múltiples eventos (`DineroRetiradoEvento` y `DineroDepositadoEvento`) asegurando la consistencia en el Event Sourcing bajo una sola operación de servicio.
 *   **Proyección de Saldos en Tiempo Real:** Actualización inmediata de los balances en bases de datos de lectura optimizadas.
@@ -40,7 +40,6 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 | **Read Side (Reportes)** | SQL Server + Dapper |
 | **Gestión de Usuarios** | SQL Server + Dapper |
 | **Generación de Documentos** | QuestPDF |
-| **Frontend UI** | React.js (Vite) + Material Design (MUI) |
 
 ## 🚀 Flujo del Sistema
 
@@ -58,7 +57,6 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 * **`Isra.Demos.Microservicios.EstadoCuenta`**: Servicio especializado en la generación de reportes y documentos.
 * **`Isra.Demos.Microservicios.Modelo`**: Biblioteca de clases compartida y definiciones de dominio.
 * **`Isra.Demos.Microservicios.UsuariosCuentas`**: API de entrada que gestiona identidades, **valida la unicidad de usuarios en base de datos relacional**, asigna una cuenta bancaria inicial, y **gestiona el flujo de inicio de sesión entregando tokens JWT**.
-* **`portal-bancario`**: Interfaz de usuario (Frontend). Construida sobre React y Vite, se encarga de consumir y presentar los datos al cliente consumiendo de manera segura los microservicios, proporcionando un Dashboard moderno y elegante.
 
 ## 📋 Requisitos e Instalación
 
