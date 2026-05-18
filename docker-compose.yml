@@ -3,15 +3,27 @@ services:
     image: apache/kafka:3.7.0
     container_name: kafka
     ports:
-      - "9092:9092"
-      - "9093:9093"
+      - "9092:9092"   # Puerto expuesto para tu máquina local (Host)
+      - "9093:9093"   # Puerto del controlador (interno/externo si se requiere)
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      
+      # 1. Definimos 3 oyentes: Uno interno (INTERNAL), uno externo (EXTERNAL) y el del controlador
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      
+      # 2. Esta es la clave. Mapeamos cómo deben buscar a Kafka desde afuera y desde adentro
+      # - Los otros contenedores usarán el nombre del servicio 'kafka' en el puerto 29092
+      # - Tu máquina local usará 'localhost' en el puerto 9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      
+      # 3. Mapeamos los protocolos de seguridad para cada listener
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      
+      # 4. Definimos qué listener se usará para la comunicación interna entre brokers (si escalaras el clúster)
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -23,5 +35,3 @@ services:
 
 volumes:
   kafka-data:
-  
- 

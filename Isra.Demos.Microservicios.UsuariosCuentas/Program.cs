@@ -6,9 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuración de CORS para permitir al frontend conectarse
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AllowFrontendReact", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173", "http://localhost:4200", "http://localhost:5116")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
