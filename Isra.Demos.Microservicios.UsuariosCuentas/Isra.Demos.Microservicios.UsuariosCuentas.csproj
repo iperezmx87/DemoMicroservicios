@@ -23,7 +23,7 @@
 	<PropertyGroup>
 		<RootNamespace>Isra.Demos.Microservicios.UsuariosCuentas</RootNamespace>
 		<ContainerRepository>pesimx87/isra-microservicios-usuarios-cuentas</ContainerRepository>
-		<ContainerImageTag>1.1.2</ContainerImageTag>
+		<ContainerImageTag>1.1.5</ContainerImageTag>
 		<ContainerRegistry>docker.io</ContainerRegistry>
 		<ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0</ContainerBaseImage>
 		<ContainerPort>8071</ContainerPort>
