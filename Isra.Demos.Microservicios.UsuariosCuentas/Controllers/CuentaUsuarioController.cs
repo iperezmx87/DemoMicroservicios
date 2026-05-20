@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
 {
@@ -13,6 +14,7 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CuentaUsuarioController : ControllerBase
     {
         private readonly ICuentaServicio _cuentaServicio;
@@ -36,6 +38,7 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
         /// <param name="cuenta"></param>
         /// <returns></returns>
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> CrearCuentaAsync([FromBody] CuentaUsuario cuenta)
         {
             if (cuenta == null)
@@ -82,6 +85,7 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.Usuario) || string.IsNullOrWhiteSpace(request.Secreto))
@@ -119,6 +123,42 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
             {
                 Success = true,
                 Token = tokenHandler.WriteToken(token)
+            });
+        }
+
+        /// <summary>
+        /// Obtiene la cuenta del usuario usando el correo de usuario
+        /// </summary>
+        /// <param name="usuario"></param>
+        /// <returns></returns>
+        [HttpGet("obtener-cuenta/{usuario}")]
+        public async Task<IActionResult> ObtenerCuentaPorUsuarioAsync(string usuario)
+        {
+            if (string.IsNullOrWhiteSpace(usuario))
+            {
+                return BadRequest(new { Success = false, Mensaje = "El nombre de usuario es requerido" });
+            }
+
+            var cuenta = await _cuentaServicio.ObtenerCuentaPorUsuarioAsync(usuario);
+
+            if (cuenta == null)
+            {
+                return NotFound(new { Success = false, Mensaje = "Cuenta no encontrada" });
+            }
+
+            return Ok(new
+            {
+                Success = true,
+                Cuenta = new
+                {
+                    cuenta.Id,
+                    cuenta.IdCuenta,
+                    cuenta.Propietario,
+                    cuenta.Usuario,
+                    cuenta.FechaHoraCreacion,
+                    cuenta.FechaHoraModificacion,
+                    cuenta.Estatus
+                }
             });
         }
     }

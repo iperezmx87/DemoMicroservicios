@@ -21,5 +21,12 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Servicio
         /// <param name="secreto"></param>
         /// <returns></returns>
         Task<CuentaUsuario> ValidarCredencialesAsync(string usuario, string secreto);
+
+        /// <summary>
+        /// Obtiene la cuenta por el nombre de usuario. Este método permite recuperar la información de una cuenta de usuario específica utilizando su nombre de usuario como criterio de búsqueda. Es útil para obtener detalles de la cuenta, como el propietario, la fecha de creación, el estatus, entre otros, sin necesidad de validar las credenciales. La implementación de este método puede involucrar consultas a una base de datos u otro tipo de almacenamiento donde se mantengan las cuentas de usuario.
+        /// </summary>
+        /// <param name="usuario"></param>
+        /// <returns></returns>
+        Task<CuentaUsuario> ObtenerCuentaPorUsuarioAsync(string usuario);
     }
 }

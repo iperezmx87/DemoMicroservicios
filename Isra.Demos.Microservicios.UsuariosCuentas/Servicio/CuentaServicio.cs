@@ -41,6 +41,16 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Servicio
         }
 
         /// <summary>
+        /// Obtiene una cuenta de usuario por su nombre de usuario. Este método recibe un string que representa el nombre de usuario y devuelve un objeto CuentaUsuario que contiene la información de la cuenta correspondiente a ese nombre de usuario. La implementación de este método puede incluir validaciones adicionales, manejo de errores y cualquier otra lógica necesaria para garantizar el correcto funcionamiento del proceso de obtención de cuentas de usuario.
+        /// </summary>
+        /// <param name="usuario"></param>
+        /// <returns></returns>
+        public async Task<CuentaUsuario> ObtenerCuentaPorUsuarioAsync(string usuario)
+        {
+            return await _cuentaRepositorio.ObtenerCuentaPorUsuarioAsync(usuario);
+        }
+
+        /// <summary>
         /// Validar credenciales de usuario
         /// </summary>
         public async Task<CuentaUsuario> ValidarCredencialesAsync(string usuario, string secreto)
