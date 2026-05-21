@@ -1,5 +1,7 @@
 using Isra.Demos.Microservicios.RecepcionTransferencias;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Configuracion;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
 using MongoDB.Driver;
 
 
@@ -17,8 +19,12 @@ var mongoDatabase = mongoClient.GetDatabase(builder.Configuration.GetValue("Mong
 // Registrar servicios y repositorios
 builder.Services.AddSingleton<IMongoClient, MongoClient>();
 builder.Services.AddSingleton(mongoDatabase);
+builder.Services.AddSingleton<IColaMensajesService, KafkaColaMensajesService>();
+builder.Services.AddSingleton<IRepositorioEventos, RepositorioEventos>();
+builder.Services.AddSingleton<ICuentaBancariaService, CuentaBancariaService>();
 
-builder.Services.AddHostedService<>();
+builder.Services.AddHostedService<ProcesadorMensajesSalidaService>();
+builder.Services.AddHostedService<ReceptorTransferenciasConsumerService>();
 
 var host = builder.Build();
 host.Run();

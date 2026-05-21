@@ -1,4 +1,7 @@
-﻿namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
 {
     /// <summary>
     /// Evento de dinero depositado
@@ -109,6 +112,12 @@
         /// Monto recibido
         /// </summary>
         public decimal Monto { get; set; }
+
+        /// <summary>
+        /// Cuenta destino a la que se realizará la transferencia. Esta propiedad es crucial para identificar la cuenta receptora de los fondos transferidos, lo que permite que el sistema pueda actualizar correctamente el saldo de la cuenta destino y garantizar que la transferencia se procese de manera adecuada. Al incluir esta información en el evento, se facilita la trazabilidad de las transacciones y se asegura que todas las partes involucradas en la transferencia tengan acceso a los detalles necesarios para su correcta ejecución y registro.
+        /// </summary>
+        [BsonGuidRepresentation(GuidRepresentation.Standard)]
+        public Guid CuentaDestinoId { get; set; }
 
         /// <summary>
         /// Constructor para inicializar el evento con los datos necesarios. Este constructor es esencial para garantizar que el evento se cree con toda la información relevante desde el momento de su instanciación, lo que facilita su uso en el proceso de recepción de transferencias. Al proporcionar un constructor que acepta los parámetros necesarios, se asegura que el evento se construya de manera consistente y que todos los datos importantes estén disponibles para su procesamiento posterior en el sistema.

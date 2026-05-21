@@ -1,10 +1,10 @@
 ﻿using Confluent.Kafka;
-using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
-using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
 using MongoDB.Driver;
 using System.Text.Json;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos
+namespace Isra.Demos.Microservicios.RecepcionTransferencias
 {
     /// <summary>
     /// Procesador de los mensajes de salida de mongodb que los publica en kafka
@@ -54,30 +54,13 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos
 
                     switch (JsonDocument.Parse(msg.Payload).RootElement.GetProperty("TipoEvento").GetString())
                     {
-                        case "DineroDepositadoEvento":
-                            tplResultPublicar =
-                                await _colaMensajesService.PublicarDineroDepositadoEventoAsync(
-                                    JsonSerializer.Deserialize<DineroDepositadoEvento>(msg.Payload));
-                            break;
-                        case "DineroRetiradoEvento":
-                            tplResultPublicar =
-                                await _colaMensajesService.PublicarDineroRetiradoEventoAsync(
-                                    JsonSerializer.Deserialize<DineroRetiradoEvento>(msg.Payload));
-                            break;
-
-                        case "TransferenciaDevueltaEvento":
-                            tplResultPublicar = await _colaMensajesService.PublicarTransferenciaDevueltaEventoAsync(
-                                JsonSerializer.Deserialize<TransferenciaDevueltaEvento>(msg.Payload));
-                            break;
-
-                        case "TransferenciaRealizadaEvento":
-                            tplResultPublicar = await _colaMensajesService.PublicarTransferenciaRealizadaEventoAsync(
-                                JsonSerializer.Deserialize<TransferenciaRealizadaEvento>(msg.Payload));
+                        case "TransferenciaRecibidaEvento":
+                            tplResultPublicar = await _colaMensajesService.PublicarTransferenciaRecibidaEventoAsync(
+                                JsonSerializer.Deserialize<TransferenciaRecibidaEvento>(msg.Payload));
                             break;
 
                         default:
                             break;
-                            // throw new InvalidOperationException("Tipo de evento desconocido en el mensaje de salida.");
                     }
 
                     if (tplResultPublicar.Item2 == nameof(PersistenceStatus.Persisted))

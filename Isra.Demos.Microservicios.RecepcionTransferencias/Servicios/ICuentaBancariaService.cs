@@ -18,10 +18,9 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
         /// <summary>
         /// Transfiere dinero de una cuenta origen a una cuenta destino.
         /// </summary>
-        /// <param name="cuentaOrigenId"></param>
         /// <param name="cuentaDestinoId"></param>
         /// <param name="monto"></param>
         /// <returns></returns>
-        Task RecibirTransferenciaAsync(Guid cuentaOrigenId, Guid cuentaDestinoId, decimal monto);
+        Task RecibirTransferenciaAsync(Guid cuentaDestinoId, decimal monto);
     }
 }

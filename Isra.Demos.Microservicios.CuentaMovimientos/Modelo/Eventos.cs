@@ -105,6 +105,43 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
     }
 
     /// <summary>
+    /// Evento de transferencia recibida, este evento se dispara cuando una transferencia ha sido recibida en la cuenta destino, lo que indica que los fondos han sido acreditados correctamente en la cuenta receptora. Este evento es fundamental para el proceso de transferencia de fondos, ya que permite registrar la acción de recibir una transferencia y proporciona información relevante como el monto recibido. Al emitir este evento, se puede desencadenar una serie de acciones en otros servicios o componentes del sistema, como la actualización del estado de la cuenta destino, la notificación a los usuarios involucrados en la transferencia y la generación de registros
+    /// </summary>
+    public class TransferenciaRecibidaEvento : EventoBase
+    {
+        /// <summary>
+        /// Monto recibido
+        /// </summary>
+        public decimal Monto { get; set; }
+
+        /// <summary>
+        /// Cuenta destino a la que se realizará la transferencia. Esta propiedad es crucial para identificar la cuenta receptora de los fondos transferidos, lo que permite que el sistema pueda actualizar correctamente el saldo de la cuenta destino y garantizar que la transferencia se procese de manera adecuada. Al incluir esta información en el evento, se facilita la trazabilidad de las transacciones y se asegura que todas las partes involucradas en la transferencia tengan acceso a los detalles necesarios para su correcta ejecución y registro.
+        /// </summary>
+        [BsonGuidRepresentation(GuidRepresentation.Standard)]
+        public Guid CuentaDestinoId { get; set; }
+
+        /// <summary>
+        /// Constructor para inicializar el evento con los datos necesarios. Este constructor es esencial para garantizar que el evento se cree con toda la información relevante desde el momento de su instanciación, lo que facilita su uso en el proceso de recepción de transferencias. Al proporcionar un constructor que acepta los parámetros necesarios, se asegura que el evento se construya de manera consistente y que todos los datos importantes estén disponibles para su procesamiento posterior en el sistema.
+        /// </summary>
+        /// <param name="id">Id de cuenta destino</param>
+        /// <param name="monto">Monto recibido</param>
+        /// <param name="version">Versión del evento</param>
+        public TransferenciaRecibidaEvento(Guid id, decimal monto, int version)
+        {
+            AggregateId = id;
+            Monto = monto;
+            Version = version;
+        }
+
+        /// <summary>
+        /// Constructor vacio para json
+        /// </summary>
+        public TransferenciaRecibidaEvento()
+        {
+        }
+    }
+
+    /// <summary>
     /// Cuando una trasnferencia en la cuenta destino falle, se hará un rollback de la transferencia, lo que implica que se revertirá cualquier cambio realizado en la cuenta origen y se notificará a los usuarios involucrados sobre el fallo de la transferencia. Este evento es crucial para mantener la integridad de las transacciones y garantizar que el sistema pueda manejar adecuadamente los errores que puedan surgir durante el proceso de transferencia. Al emitir este evento, se puede desencadenar una serie de acciones correctivas, como la restauración del saldo original en la cuenta origen y la generación de alertas para los usuarios afectados, lo que contribuye a mejorar la experiencia del usuario y a mantener la confianza en el sistema.
     /// </summary>
     public class TransferenciaDevueltaEvento : EventoBase

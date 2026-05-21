@@ -39,28 +39,24 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
             return cuenta;
         }
 
-        ///// <summary>
-        ///// Transfiere dinero de una cuenta a otra
-        ///// Se efectúa solamente el evento del dinero enviado, es otro servicio quien recibe el evento y procesa el deposito
-        ///// </summary>
-        ///// <param name="cuentaOrigenId"></param>
-        ///// <param name="cuentaDestinoId"></param>
-        ///// <param name="monto"></param>
-        ///// <returns></returns>
-        //public async Task TransferirAsync(Guid cuentaOrigenId, Guid cuentaDestinoId, decimal monto)
-        //{
-        //    var cuentaOrigen = await ObtenerCuentaAsync(cuentaOrigenId);
+        /// <summary>
+        /// Procesar la transferencia recibida, aplicar reglas de negocio
+        /// </summary>
+        /// <param name="cuentaDestinoId"></param>
+        /// <param name="monto"></param>
+        /// <returns></returns>
+        public async Task RecibirTransferenciaAsync(Guid cuentaDestinoId, decimal monto)
+        {
+            var cuentaDestino = await ObtenerCuentaAsync(cuentaDestinoId);
 
-        //    if (cuentaOrigen.Version == 0)
-        //        throw new ArgumentException("La cuenta de origen no existe o no ha sido inicializada.");
+            await cuentaDestino.RecibirTransferenciaAsync(cuentaDestinoId, monto);
 
-        //    await cuentaOrigen.TransferirDineroACuentaAsync(cuentaDestinoId, monto);
+            foreach (var evento in cuentaDestino.ObtenerEventos())
+            {
+                await _repositorioEventos.GuardarEventoAsync(evento);
+            }
 
-        //    foreach (var evento in cuentaOrigen.ObtenerEventos())
-        //    {
-        //        await _repositorioEventos.GuardarEventoAsync(evento);
-        //    }
-        //    cuentaOrigen.LimpiarEventos();
-        //}
+            cuentaDestino.LimpiarEventos();
+        }
     }
 }

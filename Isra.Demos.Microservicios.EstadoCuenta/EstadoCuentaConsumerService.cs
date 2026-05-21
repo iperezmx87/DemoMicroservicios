@@ -32,7 +32,6 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
             };
 
             _consumer = new ConsumerBuilder<string, string>(config).Build();
-            
         }
 
         /// <summary>
@@ -89,7 +88,7 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
                             case "TransferenciaRecibidaEvento":
                                 var recepcionTransferencia = JsonSerializer.Deserialize<TransferenciaRecibidaEvento>(eventoJson);
 
-                                await RegistrarMovimiento(recepcionTransferencia, "Envío de dinero transferencia");
+                                await RegistrarMovimiento(recepcionTransferencia, "Recepción de dinero transferencia");
 
                                 Console.WriteLine($"Recepción de transferencia: {recepcionTransferencia.AggregateId} {recepcionTransferencia.Monto}");
 
@@ -98,12 +97,12 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
                             case "TransferenciaDevueltaEvento":
                                 var devolucionTransferencia = JsonSerializer.Deserialize<TransferenciaDevueltaEvento>(eventoJson);
 
-                                await RegistrarMovimiento(devolucionTransferencia, "Envío de dinero transferencia");
+                                await RegistrarMovimiento(devolucionTransferencia, "Devolución de dinero transferencia");
 
                                 Console.WriteLine($"Devolución de transferencia: {devolucionTransferencia.AggregateId} {devolucionTransferencia.Monto}");
 
                                 break;
-                            
+
                             default:
                                 break;
                         }

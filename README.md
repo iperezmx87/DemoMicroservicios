@@ -25,7 +25,7 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 *   **Autenticación y Seguridad:** Implementación de inicio de sesión seguro con tokens JWT (JSON Web Tokens) en el servicio `UsuariosCuentas`, protegiendo de esta manera el acceso a los endpoints restringidos del ecosistema (`WebApi`). *[Características desarrolladas junto a Antigravity (IA de Google DeepMind)]*
 *   **Portal Web Bancario:** Revisa las ramas del repositorio para revisar las diferentes implementaciones de front end.
 *   **Gestión Integral de Cuentas:** Capacidad para crear usuarios con validación estricta de unicidad en base de datos relacional antes de la emisión de eventos de dominio.
-*   **Transacciones Atómicas Complejas:** Soporte para depósitos, retiros y **transferencias** entre cuentas. Las transferencias generan múltiples eventos (`DineroRetiradoEvento` y `DineroDepositadoEvento`) asegurando la consistencia en el Event Sourcing bajo una sola operación de servicio.
+*   **Saga de Transferencias Asíncronas:** Soporte para depósitos, retiros y **transferencias internas** mediante el **Patrón Saga por Coreografía**. Las transferencias dividen su ejecución en dos eventos distribuidos (`TransferenciaRealizadaEvento` y `TransferenciaRecibidaEvento`), procesados de forma asíncrona a través de Kafka por diferentes microservicios (`CuentaMovimientos` y `RecepcionTransferencias`) para evitar el acoplamiento transaccional.
 *   **Proyección de Saldos en Tiempo Real:** Actualización inmediata de los balances en bases de datos de lectura optimizadas.
 *   **Generación de Estados de Cuenta:** Extracción del historial proyectado y exportación a PDFs profesionales utilizando QuestPDF.
 
@@ -43,16 +43,21 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 
 ## 🚀 Flujo del Sistema
 
-1.  **Command:** La Web API recibe una instrucción (ej. un nuevo movimiento) y la persiste en el EventStore y la tabla Outbox de forma atómica.
-2.  **Relay:** El proceso de despacho detecta el nuevo registro y lo publica en el tópico correspondiente de Kafka.
-3.  **Proyección de Saldo:** Un consumidor procesa el evento y actualiza el balance en tiempo real en **PostgreSQL**.
-4.  **Proyección de Historial:** Simultáneamente, otro consumidor registra el movimiento detallado en **SQL Server**.
-5.  **Query:** El usuario consulta su estado de cuenta; el sistema recupera los datos proyectados y genera un PDF profesional mediante **QuestPDF**.
+1.  **Command:** La Web API recibe una instrucción (ej. depositar, retirar o transferir) y la persiste en el EventStore de la cuenta origen y la tabla Outbox correspondientes.
+2.  **Relay:** El proceso de despacho (`ProcesadorMensajesSalidaService`) detecta el nuevo registro y lo publica en Kafka.
+3.  **Saga (Para Transferencias):**
+    *   El servicio `CuentaMovimientos` inicia la transacción debitando los fondos y emitiendo `TransferenciaRealizadaEvento`.
+    *   El servicio `RecepcionTransferencias` consume dicho evento, valida la cuenta destino y acredita el dinero asíncronamente emitiendo `TransferenciaRecibidaEvento`.
+    *   *Si la cuenta destino no existe o está inactiva*, se emite una transacción compensatoria (`TransferenciaDevueltaEvento`) para devolver los fondos a la cuenta origen.
+4.  **Proyección de Saldo:** Un consumidor procesa los eventos y actualiza el balance en tiempo real en **PostgreSQL**.
+5.  **Proyección de Historial:** Simultáneamente, otro consumidor registra el movimiento detallado en **SQL Server**.
+6.  **Query:** El usuario consulta su estado de cuenta; el sistema recupera los datos proyectados y genera un PDF profesional mediante **QuestPDF**.
 
 ## 📁 Estructura del Proyecto
 
 * **`Isra.Demos.Microservicios.WebApi`**: Punto de entrada y gestión de Comandos.
-* **`Isra.Demos.Microservicios.CuentaMovimientos`**: Gestión del flujo de movimientos bancarios **(Depósitos, Retiros y Transferencias)** mediante Event Sourcing.
+* **`Isra.Demos.Microservicios.CuentaMovimientos`**: Gestión del flujo de movimientos bancarios **(Depósitos, Retiros e Inicio de Transferencias)** mediante Event Sourcing. Emite el evento inicial de la Saga.
+* **`Isra.Demos.Microservicios.RecepcionTransferencias`**: Microservicio encargado de recibir y procesar las transferencias entrantes asíncronamente a través del bus Kafka, aplicando validaciones del lado receptor y coordinando el éxito o reverso de la Saga.
 * **`Isra.Demos.Microservicios.Saldo`**: Microservicio encargado de la proyección y consulta de saldos actuales.
 * **`Isra.Demos.Microservicios.EstadoCuenta`**: Servicio especializado en la generación de reportes y documentos.
 * **`Isra.Demos.Microservicios.UsuariosCuentas`**: API de entrada que gestiona identidades, **valida la unicidad de usuarios en base de datos relacional**, asigna una cuenta bancaria inicial, y **gestiona el flujo de inicio de sesión entregando tokens JWT**.

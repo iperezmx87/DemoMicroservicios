@@ -26,6 +26,8 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Configuracion
 
             BsonClassMap.RegisterClassMap<TransferenciaRealizadaEvento>();
 
+            BsonClassMap.RegisterClassMap<TransferenciaRecibidaEvento>();
+
             BsonClassMap.RegisterClassMap<TransferenciaDevueltaEvento>();
         }
     }

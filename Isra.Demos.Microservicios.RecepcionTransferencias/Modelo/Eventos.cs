@@ -4,6 +4,68 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
 {
     /// <summary>
+    /// Evento de dinero depositado
+    /// </summary>
+    public class DineroDepositadoEvento : EventoBase
+    {
+        /// <summary>
+        /// Monto a depositar
+        /// </summary>
+        public decimal Monto { get; set; }
+
+        /// <summary>
+        /// Constructor para inicializar el evento con los datos necesarios
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="monto"></param>
+        /// <param name="version"></param>
+        public DineroDepositadoEvento(Guid id, decimal monto, int version)
+        {
+            AggregateId = id;
+            Monto = monto;
+            Version = version;
+        }
+
+        /// <summary>
+        /// constructor sin parámetros para permitir la deserialización del evento desde JSON, ya que algunas bibliotecas de serialización requieren un constructor sin parámetros para crear una instancia del objeto antes de asignar las propiedades. Este constructor es esencial para garantizar que el proceso de deserialización funcione correctamente, permitiendo que el evento se reconstruya a partir de su representación JSON sin problemas.
+        /// </summary>
+        public DineroDepositadoEvento()
+        {
+        }
+    }
+
+    /// <summary>
+    /// Evento de dinero retirado
+    /// </summary>
+    public class DineroRetiradoEvento : EventoBase
+    {
+        /// <summary>
+        /// Monto a retirar
+        /// </summary>
+        public decimal Monto { get; set; }
+
+        /// <summary>
+        /// Constructor para inicializar el evento con los datos necesarios
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="monto"></param>
+        /// <param name="version"></param>
+        public DineroRetiradoEvento(Guid id, decimal monto, int version)
+        {
+            AggregateId = id;
+            Monto = monto;
+            Version = version;
+        }
+
+        /// <summary>
+        /// constructor sin parámetros para permitir la deserialización del evento desde JSON, ya que algunas bibliotecas de serialización requieren un constructor sin parámetros para crear una instancia del objeto antes de asignar las propiedades. Este constructor es esencial para garantizar que el proceso de deserialización funcione correctamente, permitiendo que el evento se reconstruya a partir de su representación JSON sin problemas.
+        /// </summary>
+        public DineroRetiradoEvento()
+        {
+        }
+    }
+
+    /// <summary>
     /// Evento que se dispara cuando se ha lanzado una orden de transferencia, este evento es importante para el proceso de transferencia de fondos entre cuentas, ya que permite registrar la acción de iniciar una transferencia y proporciona información relevante como el monto a transferir y la cuenta destino. Al emitir este evento, se puede desencadenar una serie de acciones en otros servicios o componentes del sistema, como la validación de fondos, la actualización del estado de la cuenta origen y destino, y la notificación a los usuarios involucrados en la transferencia. Además, este evento contribuye a mantener un registro histórico de las transferencias realizadas, lo que es fundamental para la auditoría y el análisis de transacciones en el sistema.
     /// </summary>
     public class TransferenciaRealizadaEvento : EventoBase
@@ -51,6 +113,12 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
         /// Monto recibido
         /// </summary>
         public decimal Monto { get; set; }
+
+        /// <summary>
+        /// Cuenta destino a la que se realizará la transferencia. Esta propiedad es crucial para identificar la cuenta receptora de los fondos transferidos, lo que permite que el sistema pueda actualizar correctamente el saldo de la cuenta destino y garantizar que la transferencia se procese de manera adecuada. Al incluir esta información en el evento, se facilita la trazabilidad de las transacciones y se asegura que todas las partes involucradas en la transferencia tengan acceso a los detalles necesarios para su correcta ejecución y registro.
+        /// </summary>
+        [BsonGuidRepresentation(GuidRepresentation.Standard)]
+        public Guid CuentaDestinoId { get; set; }
 
         /// <summary>
         /// Constructor para inicializar el evento con los datos necesarios. Este constructor es esencial para garantizar que el evento se cree con toda la información relevante desde el momento de su instanciación, lo que facilita su uso en el proceso de recepción de transferencias. Al proporcionar un constructor que acepta los parámetros necesarios, se asegura que el evento se construya de manera consistente y que todos los datos importantes estén disponibles para su procesamiento posterior en el sistema.

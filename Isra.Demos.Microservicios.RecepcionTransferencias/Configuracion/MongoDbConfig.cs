@@ -20,6 +20,10 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Configuracion
                 cm.SetIsRootClass(true);
             });
 
+            BsonClassMap.RegisterClassMap<DineroDepositadoEvento>();
+
+            BsonClassMap.RegisterClassMap<DineroRetiradoEvento>();
+
             BsonClassMap.RegisterClassMap<TransferenciaRealizadaEvento>();
 
             BsonClassMap.RegisterClassMap<TransferenciaRecibidaEvento>();

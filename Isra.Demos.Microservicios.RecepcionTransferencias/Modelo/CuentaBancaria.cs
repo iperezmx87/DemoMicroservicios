@@ -55,32 +55,30 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
         /// </summary>
         public void LimpiarEventos() => _eventos.Clear();
 
-        ///// <summary>
-        ///// Valida las reglas de negocio iniciales para hacer la transferencia de dinero
-        ///// </summary>
-        ///// <param name="monto"></param>
-        ///// <param name="idCuentaDestino"></param>
-        //public async Task TransferirDineroACuentaAsync(Guid idCuentaDestino, decimal monto)
-        //{
-        //    // buscar la cuenta destino
-        //    var cuentaDestino = await _cuentaBancariaService.ObtenerCuentaAsync(idCuentaDestino);
+        /// <summary>
+        /// Procesar la transferencia
+        /// </summary>
+        /// <param name="idCuentaDestino"></param>
+        /// <param name="monto"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task RecibirTransferenciaAsync(Guid idCuentaDestino, decimal monto)
+        {
+            var cuentaDestino = await _cuentaBancariaService.ObtenerCuentaAsync(idCuentaDestino);
 
-        //    if (cuentaDestino == null)
-        //        throw new ArgumentException("La cuenta destino no existe", nameof(idCuentaDestino));
+            if (cuentaDestino == null)
+                throw new ArgumentException("La cuenta destino no existe", nameof(idCuentaDestino));
 
-        //    if (monto <= 0)
-        //        throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
+            if (monto <= 0)
+                throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
 
-        //    if (Saldo < monto)
-        //        throw new InvalidOperationException("Saldo insuficiente");
+            // validar si la cuenta es correcta
+            var evento = new TransferenciaRecibidaEvento(idCuentaDestino, monto, Version + 1);
 
-        //    var evento = new TransferenciaRealizadaEvento(
-        //        Id, monto, idCuentaDestino, Version + 1);
+            AplicarEvento(evento);
 
-        //    AplicarEvento(evento);
-
-        //    _eventos.Add(evento);
-        //}
+            _eventos.Add(evento);
+        }
 
         /// <summary>
         /// Reconstruir el estado a partir de eventos históricos
@@ -100,6 +98,21 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
         {
             switch (evento)
             {
+                case DineroDepositadoEvento dineroDepositado:
+                    Saldo += dineroDepositado.Monto;
+                    Version = dineroDepositado.Version;
+                    break;
+
+                case DineroRetiradoEvento dineroRetirado:
+                    Saldo -= dineroRetirado.Monto;
+                    Version = dineroRetirado.Version;
+                    break;
+
+                case TransferenciaRealizadaEvento transferenciaRealizada:
+                    Saldo -= transferenciaRealizada.Monto;
+                    Version = transferenciaRealizada.Version;
+                    break;
+
                 case TransferenciaRecibidaEvento transferenciaRecibida:
                     Saldo += transferenciaRecibida.Monto;
                     Version = transferenciaRecibida.Version;

@@ -104,7 +104,9 @@ namespace Isra.Demos.Microservicios.WebApi.Servicios
                                 var montoTexto = m.Monto.ToString("C");
 
                                 table.Cell().Element(RowStyle).AlignRight().Text(montoTexto)
-                                     .FontColor(m.TipoMovimiento == "Deposito" || m.TipoMovimiento == "Devolución de transferencia" ? Colors.Green.Medium : Colors.Red.Medium);
+                                     .FontColor(m.TipoMovimiento == "Deposito" 
+                                     || m.TipoMovimiento == "Recepción de dinero transferencia"
+                                     || m.TipoMovimiento == "Devolución de transferencia" ? Colors.Green.Medium : Colors.Red.Medium);
 
                                 static IContainer RowStyle(IContainer container) => container.PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
                             }
