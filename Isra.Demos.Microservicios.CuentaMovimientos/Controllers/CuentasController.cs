@@ -1,5 +1,5 @@
 using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
-using Isra.Demos.Microservicios.Servicios;
+using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

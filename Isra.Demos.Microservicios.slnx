@@ -7,6 +7,7 @@
   </Folder>
   <Folder Name="/Consumidores eventos/">
     <Project Path="Isra.Demos.Microservicios.EstadoCuenta/Isra.Demos.Microservicios.EstadoCuenta.csproj" />
+    <Project Path="Isra.Demos.Microservicios.RecepcionTransferencias/Isra.Demos.Microservicios.RecepcionTransferencias.csproj" Id="95500a8d-e6e4-41f9-82fa-3793dd4369d1" />
     <Project Path="Isra.Demos.Microservicios.Saldo/Isra.Demos.Microservicios.Saldo.csproj" />
   </Folder>
   <Folder Name="/Pruebas/" />

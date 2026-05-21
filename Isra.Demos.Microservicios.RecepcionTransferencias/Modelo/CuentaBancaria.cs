@@ -1,8 +1,8 @@
-using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
+namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
 {
     /// <summary>
     /// Agregado que representa una cuenta bancaria y su estado
@@ -55,67 +55,32 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         /// </summary>
         public void LimpiarEventos() => _eventos.Clear();
 
-        /// <summary>
-        /// Depositar dinero a la cuenta
-        /// </summary>
-        public void Depositar(decimal monto)
-        {
-            if (monto <= 0)
-                throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
+        ///// <summary>
+        ///// Valida las reglas de negocio iniciales para hacer la transferencia de dinero
+        ///// </summary>
+        ///// <param name="monto"></param>
+        ///// <param name="idCuentaDestino"></param>
+        //public async Task TransferirDineroACuentaAsync(Guid idCuentaDestino, decimal monto)
+        //{
+        //    // buscar la cuenta destino
+        //    var cuentaDestino = await _cuentaBancariaService.ObtenerCuentaAsync(idCuentaDestino);
 
-            var evento = new DineroDepositadoEvento(
-                Id, monto, Version + 1);
+        //    if (cuentaDestino == null)
+        //        throw new ArgumentException("La cuenta destino no existe", nameof(idCuentaDestino));
 
-            AplicarEvento(evento);
+        //    if (monto <= 0)
+        //        throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
 
-            _eventos.Add(evento);
-        }
+        //    if (Saldo < monto)
+        //        throw new InvalidOperationException("Saldo insuficiente");
 
-        /// <summary>
-        /// Retirar dinero de la cuenta
-        /// </summary>
-        public void Retirar(decimal monto)
-        {
-            if (monto <= 0)
-                throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
+        //    var evento = new TransferenciaRealizadaEvento(
+        //        Id, monto, idCuentaDestino, Version + 1);
 
-            if (Saldo < monto)
-                throw new InvalidOperationException("Saldo insuficiente");
+        //    AplicarEvento(evento);
 
-            var evento = new DineroRetiradoEvento(
-                Id, monto, Version + 1);
-
-            AplicarEvento(evento);
-
-            _eventos.Add(evento);
-        }
-
-        /// <summary>
-        /// Valida las reglas de negocio iniciales para hacer la transferencia de dinero
-        /// </summary>
-        /// <param name="monto"></param>
-        /// <param name="idCuentaDestino"></param>
-        public async Task TransferirDineroACuentaAsync(Guid idCuentaDestino, decimal monto)
-        {
-            // buscar la cuenta destino
-            var cuentaDestino = await _cuentaBancariaService.ObtenerCuentaAsync(idCuentaDestino);
-
-            if (cuentaDestino == null)
-                throw new ArgumentException("La cuenta destino no existe", nameof(idCuentaDestino));
-
-            if (monto <= 0)
-                throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
-
-            if (Saldo < monto)
-                throw new InvalidOperationException("Saldo insuficiente");
-
-            var evento = new TransferenciaRealizadaEvento(
-                Id, monto, idCuentaDestino, Version + 1);
-
-            AplicarEvento(evento);
-
-            _eventos.Add(evento);
-        }
+        //    _eventos.Add(evento);
+        //}
 
         /// <summary>
         /// Reconstruir el estado a partir de eventos históricos
@@ -135,23 +100,13 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         {
             switch (evento)
             {
-                case DineroDepositadoEvento dineroDepositado:
-                    Saldo += dineroDepositado.Monto;
-                    Version = dineroDepositado.Version;
-                    break;
-
-                case DineroRetiradoEvento dineroRetirado:
-                    Saldo -= dineroRetirado.Monto;
-                    Version = dineroRetirado.Version;
-                    break;
-
-                case TransferenciaRealizadaEvento transferenciaRealizada:
-                    Saldo -= transferenciaRealizada.Monto;
-                    Version = transferenciaRealizada.Version;
+                case TransferenciaRecibidaEvento transferenciaRecibida:
+                    Saldo += transferenciaRecibida.Monto;
+                    Version = transferenciaRecibida.Version;
                     break;
 
                 case TransferenciaDevueltaEvento transferenciaDevuelta:
-                    Saldo += transferenciaDevuelta.Monto;
+                    Saldo -= transferenciaDevuelta.Monto;
                     Version = transferenciaDevuelta.Version;
                     break;
             }

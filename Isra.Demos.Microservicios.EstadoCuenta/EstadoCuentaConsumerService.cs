@@ -87,7 +87,7 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
                                 break;
 
                             case "TransferenciaRecibidaEvento":
-                                var recepcionTransferencia = JsonSerializer.Deserialize<TransferenciaRealizadaEvento>(eventoJson);
+                                var recepcionTransferencia = JsonSerializer.Deserialize<TransferenciaRecibidaEvento>(eventoJson);
 
                                 await RegistrarMovimiento(recepcionTransferencia, "Envío de dinero transferencia");
 

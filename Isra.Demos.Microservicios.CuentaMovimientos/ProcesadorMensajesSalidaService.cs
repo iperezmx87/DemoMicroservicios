@@ -1,6 +1,7 @@
 ﻿using Confluent.Kafka;
 using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
-using Isra.Demos.Microservicios.Servicios;
+using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
+using MongoDB.Driver;
 using System.Text.Json;
 
 namespace Isra.Demos.Microservicios.CuentaMovimientos

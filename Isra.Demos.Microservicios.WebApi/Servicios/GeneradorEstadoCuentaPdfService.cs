@@ -82,7 +82,6 @@ namespace Isra.Demos.Microservicios.WebApi.Servicios
                             {
                                 columns.RelativeColumn(2); // Fecha
                                 columns.RelativeColumn(3); // Descripción
-                                columns.RelativeColumn(2); // Versión
                                 columns.RelativeColumn(2); // Monto
                             });
 
@@ -90,7 +89,6 @@ namespace Isra.Demos.Microservicios.WebApi.Servicios
                             table.Header(header =>
                             {
                                 header.Cell().Element(CellStyle).Text("FECHA");
-                                header.Cell().Element(CellStyle).Text("DESCRIPCIÓN");
                                 header.Cell().Element(CellStyle).Text("TIPO DE MOVIMIENTO");
                                 header.Cell().Element(CellStyle).AlignRight().Text("MONTO");
 
@@ -102,13 +100,13 @@ namespace Isra.Demos.Microservicios.WebApi.Servicios
                             {
                                 table.Cell().Element(RowStyle).Text(m.FechaEvento.ToString("dd/MM/yyyy HH:mm"));
                                 table.Cell().Element(RowStyle).Text(m.TipoMovimiento);
-                                table.Cell().Element(RowStyle).Text(m.TipoMovimiento);
 
                                 var montoTexto = m.Monto.ToString("C");
-                                table.Cell().Element(RowStyle).AlignRight().Text(montoTexto)
-                                     .FontColor(m.TipoMovimiento == "Deposito" ? Colors.Green.Medium : Colors.Red.Medium);
 
-                                static IContainer RowStyle(IContainer container) => container.PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
+                                table.Cell().Element(RowStyle).AlignRight().Text(montoTexto)
+                                     .FontColor(m.TipoMovimiento == "Deposito" || m.TipoMovimiento == "Devolución de transferencia" ? Colors.Green.Medium : Colors.Red.Medium);
+
+                                static IContainer RowStyle(IContainer container) => container.PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
                             }
                         });
 

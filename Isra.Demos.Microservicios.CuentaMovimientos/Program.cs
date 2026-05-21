@@ -1,9 +1,10 @@
 using Isra.Demos.Microservicios.CuentaMovimientos;
 using Isra.Demos.Microservicios.CuentaMovimientos.Configuracion;
 using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
-using Isra.Demos.Microservicios.Servicios;
+using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

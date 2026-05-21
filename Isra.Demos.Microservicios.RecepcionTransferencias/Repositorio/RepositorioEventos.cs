@@ -1,7 +1,7 @@
-using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
 using MongoDB.Driver;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
+namespace Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio
 {
     /// <summary>
     /// Implementación del repositorio de eventos usando MongoDB
@@ -54,18 +54,12 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
                     Processed = false
                 };
 
-
                 switch (evento.TipoEvento)
                 {
-                    case "DineroDepositadoEvento":
-                        outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((DineroDepositadoEvento)evento);
+                    case "TransferenciaRecibidaEvento":
+                        outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((TransferenciaRecibidaEvento)evento);
                         break;
-                    case "DineroRetiradoEvento":
-                        outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((DineroRetiradoEvento)evento);
-                        break;
-                    case "TransferenciaRealizadaEvento":
-                        outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((TransferenciaRealizadaEvento)evento);
-                        break;
+
                     case "TransferenciaDevueltaEvento":
                         outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((TransferenciaDevueltaEvento)evento);
                         break;

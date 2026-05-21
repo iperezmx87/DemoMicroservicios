@@ -1,8 +1,9 @@
 ﻿using Confluent.Kafka;
-using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
 using System.Text.Json;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
+namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
 {
     /// <summary>
     /// Implementación de la cola de mensajes
@@ -29,32 +30,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
         }
 
         /// <summary>
-        /// Publica el mensaje en la cola
-        /// </summary>
-        /// <param name="evento"></param>
-        /// <returns></returns>
-        public async Task<Tuple<string, string>> PublicarDineroDepositadoEventoAsync(
-            DineroDepositadoEvento evento)
-        {
-            var mensaje = JsonSerializer.Serialize(evento);
-
-            return await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
-        }
-
-        /// <summary>
-        /// Publica el mensaje en la cola
-        /// </summary>
-        /// <param name="evento"></param>
-        /// <returns></returns>
-        public async Task<Tuple<string, string>> PublicarDineroRetiradoEventoAsync(
-            DineroRetiradoEvento evento)
-        {
-            var mensaje = JsonSerializer.Serialize(evento);
-
-            return await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
-        }
-
-        /// <summary>
         /// Publica el mensaje de envio de transferencia en la cola
         /// </summary>
         /// <param name="evento"></param>
@@ -73,8 +48,8 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
         /// </summary>
         /// <param name="evento"></param>
         /// <returns></returns>
-        public async Task<Tuple<string, string>> PublicarTransferenciaRealizadaEventoAsync(
-            TransferenciaRealizadaEvento evento)
+        public async Task<Tuple<string, string>> PublicarTransferenciaRecibidaEventoAsync(
+            TransferenciaRecibidaEvento evento)
         {
             var mensaje = JsonSerializer.Serialize(evento);
 

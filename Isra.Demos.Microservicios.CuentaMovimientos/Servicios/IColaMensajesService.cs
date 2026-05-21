@@ -1,6 +1,6 @@
 ﻿using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 
-namespace Isra.Demos.Microservicios.Servicios
+namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
 {
     /// <summary>
     /// Cola de mensajes
