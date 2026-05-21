@@ -1,4 +1,4 @@
-using Isra.Demos.Microservicios.Modelo;
+using Isra.Demos.Microservicios.Servicios;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -9,16 +9,13 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
     /// </summary>
     public class CuentaBancaria
     {
+        private readonly ICuentaBancariaService _cuentaBancariaService;
+
         /// <summary>
         /// Id de la cuenta bancaria, se utiliza como AggregateId para los eventos relacionados con esta cuenta. Este identificador es fundamental para el patrón de Event Sourcing, ya que permite asociar todos los eventos que afectan a esta cuenta específica. Al utilizar un Guid como identificador, se garantiza la unicidad de cada cuenta bancaria en el sistema, lo que facilita la gestión y recuperación de eventos relacionados con esta cuenta en particular. Además, este Id es esencial para reconstruir el estado de la cuenta a partir de los eventos almacenados en el repositorio de eventos.
         /// </summary>
         [BsonGuidRepresentation(GuidRepresentation.Standard)]
         public Guid Id { get; private set; }
-
-        /// <summary>
-        /// Nombre del propietario de la cuenta bancaria. Este campo es importante para identificar al titular de la cuenta y asociar las operaciones realizadas con la persona correspondiente. Al almacenar el nombre del propietario, se facilita la gestión de cuentas y la generación de informes relacionados con las transacciones y el historial de la cuenta.
-        /// </summary>
-        public string Propietario { get; set; }
 
         /// <summary>
         /// Saldo actual de la cuenta bancaria. Este campo representa el monto de dinero disponible en la cuenta en un momento dado. El saldo se actualiza cada vez que se realiza una operación de depósito o retiro, reflejando así el estado financiero actual de la cuenta. Es fundamental para la gestión de la cuenta y para garantizar que las operaciones se realicen de manera correcta, evitando sobregiros o transacciones no autorizadas. Además, el saldo es un indicador clave para los titulares de la cuenta y para los sistemas que gestionan las finanzas personales o empresariales.
@@ -39,11 +36,13 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         /// Constructor para crear una nueva cuenta bancaria con un Id específico. Este constructor es esencial para inicializar una cuenta bancaria con un identificador único, lo que permite asociar los eventos relacionados con esta cuenta de manera consistente. Al establecer el saldo inicial en 0 y la versión en 0, se garantiza que la cuenta comience con un estado limpio, listo para recibir eventos de depósito y retiro que modificarán su estado a lo largo del tiempo. Además, este constructor facilita la creación de cuentas bancarias a partir de eventos históricos, permitiendo reconstruir el estado de la cuenta a partir de los eventos almacenados en el repositorio de eventos.
         /// </summary>
         /// <param name="id"></param>
-        public CuentaBancaria(Guid id)
+        /// <param name="cuentaBancariaService"></param>
+        public CuentaBancaria(Guid id, ICuentaBancariaService cuentaBancariaService)
         {
             Id = id;
             Saldo = 0;
             Version = 0;
+            _cuentaBancariaService = cuentaBancariaService;
         }
 
         /// <summary>
@@ -59,15 +58,13 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         /// <summary>
         /// Depositar dinero a la cuenta
         /// </summary>
-        public void Depositar(decimal monto, string propietario)
+        public void Depositar(decimal monto)
         {
             if (monto <= 0)
                 throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
 
-            Propietario = propietario;
-
             var evento = new DineroDepositadoEvento(
-                Id, monto, Version + 1, propietario);
+                Id, monto, Version + 1);
 
             AplicarEvento(evento);
 
@@ -77,7 +74,7 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         /// <summary>
         /// Retirar dinero de la cuenta
         /// </summary>
-        public void Retirar(decimal monto, string propietario)
+        public void Retirar(decimal monto)
         {
             if (monto <= 0)
                 throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
@@ -85,10 +82,35 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
             if (Saldo < monto)
                 throw new InvalidOperationException("Saldo insuficiente");
 
-            Propietario = propietario;
-
             var evento = new DineroRetiradoEvento(
-                Id, monto, Version + 1, Propietario);
+                Id, monto, Version + 1);
+
+            AplicarEvento(evento);
+
+            _eventos.Add(evento);
+        }
+
+        /// <summary>
+        /// Valida las reglas de negocio iniciales para hacer la transferencia de dinero
+        /// </summary>
+        /// <param name="monto"></param>
+        /// <param name="idCuentaDestino"></param>
+        public async Task TransferirDineroACuentaAsync(Guid idCuentaDestino, decimal monto)
+        {
+            // buscar la cuenta destino
+            var cuentaDestino = await _cuentaBancariaService.ObtenerCuentaAsync(idCuentaDestino);
+
+            if (cuentaDestino == null)
+                throw new ArgumentException("La cuenta destino no existe", nameof(idCuentaDestino));
+
+            if (monto <= 0)
+                throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
+
+            if (Saldo < monto)
+                throw new InvalidOperationException("Saldo insuficiente");
+
+            var evento = new TransferenciaRealizadaEvento(
+                Id, monto, idCuentaDestino, Version + 1);
 
             AplicarEvento(evento);
 
@@ -116,13 +138,21 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
                 case DineroDepositadoEvento dineroDepositado:
                     Saldo += dineroDepositado.Monto;
                     Version = dineroDepositado.Version;
-                    Propietario = dineroDepositado.Propietario;
                     break;
 
                 case DineroRetiradoEvento dineroRetirado:
                     Saldo -= dineroRetirado.Monto;
                     Version = dineroRetirado.Version;
-                    Propietario = dineroRetirado.Propietario;
+                    break;
+
+                case TransferenciaRealizadaEvento transferenciaRealizada:
+                    Saldo -= transferenciaRealizada.Monto;
+                    Version = transferenciaRealizada.Version;
+                    break;
+
+                case TransferenciaDevueltaEvento transferenciaDevuelta:
+                    Saldo += transferenciaDevuelta.Monto;
+                    Version = transferenciaDevuelta.Version;
                     break;
             }
         }

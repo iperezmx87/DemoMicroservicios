@@ -1,6 +1,5 @@
 ﻿using Confluent.Kafka;
 using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
-using Isra.Demos.Microservicios.Modelo;
 using Isra.Demos.Microservicios.Servicios;
 using System.Text.Json;
 
@@ -14,20 +13,24 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos
     {
         private readonly IColaMensajesService _colaMensajesService;
         private readonly IMongoCollection<MensajeSalida> _outboxCollection;
+        private readonly IConfiguration _configuration;
 
         /// <summary>
         /// Constructor del servicio
         /// </summary>
         /// <param name="colaMensajesService"></param>
         /// <param name="mongoDatabase"></param>
+        /// <param name="configuration"></param>
         public ProcesadorMensajesSalidaService(
-            IColaMensajesService colaMensajesService, 
-            IMongoDatabase mongoDatabase)
+            IColaMensajesService colaMensajesService,
+            IMongoDatabase mongoDatabase,
+            IConfiguration configuration)
         {
+            _configuration = configuration;
             _colaMensajesService = colaMensajesService;
 
             _outboxCollection = mongoDatabase.GetCollection<MensajeSalida>(
-                Constantes.CuentasMovimientosCollectionName);
+                _configuration.GetValue<string>("MongoDb:CuentasMovimientosOutboxCollectionName"));
         }
 
         /// <summary>
@@ -48,17 +51,31 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos
                 {
                     Tuple<string, string> tplResultPublicar;
 
-                    if (JsonDocument.Parse(msg.Payload).RootElement.GetProperty("TipoEvento").GetString() == "DineroDepositadoEvento")
+                    switch (JsonDocument.Parse(msg.Payload).RootElement.GetProperty("TipoEvento").GetString())
                     {
-                        tplResultPublicar =
-                            await _colaMensajesService.PublicarDineroDepositadoEventoAsync(
-                                JsonSerializer.Deserialize<DineroDepositadoEvento>(msg.Payload));
-                    }
-                    else
-                    {
-                        tplResultPublicar =
-                            await _colaMensajesService.PublicarDineroRetiradoEventoAsync(
-                                JsonSerializer.Deserialize<DineroRetiradoEvento>(msg.Payload));
+                        case "DineroDepositadoEvento":
+                            tplResultPublicar =
+                                await _colaMensajesService.PublicarDineroDepositadoEventoAsync(
+                                    JsonSerializer.Deserialize<DineroDepositadoEvento>(msg.Payload));
+                            break;
+                        case "DineroRetiradoEvento":
+                            tplResultPublicar =
+                                await _colaMensajesService.PublicarDineroRetiradoEventoAsync(
+                                    JsonSerializer.Deserialize<DineroRetiradoEvento>(msg.Payload));
+                            break;
+
+                        case "TransferenciaDevueltaEvento":
+                            tplResultPublicar = await _colaMensajesService.PublicarTransferenciaDevueltaEventoAsync(
+                                JsonSerializer.Deserialize<TransferenciaDevueltaEvento>(msg.Payload));
+                            break;
+
+                        case "TransferenciaRealizadaEvento":
+                            tplResultPublicar = await _colaMensajesService.PublicarTransferenciaRealizadaEventoAsync(
+                                JsonSerializer.Deserialize<TransferenciaRealizadaEvento>(msg.Payload));
+                            break;
+
+                        default:
+                            throw new InvalidOperationException("Tipo de evento desconocido en el mensaje de salida.");
                     }
 
                     if (tplResultPublicar.Item2 == nameof(PersistenceStatus.Persisted))

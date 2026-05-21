@@ -1,7 +1,6 @@
 
 using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
-using Isra.Demos.Microservicios.Modelo;
 
 namespace Isra.Demos.Microservicios.Servicios
 {
@@ -29,10 +28,10 @@ namespace Isra.Demos.Microservicios.Servicios
         /// <param name="monto"></param>
         /// <param name="propietario"></param>
         /// <returns></returns>
-        public async Task DepositarAsync(Guid cuentaId, decimal monto, string propietario)
+        public async Task DepositarAsync(Guid cuentaId, decimal monto)
         {
             var cuenta = await ObtenerCuentaAsync(cuentaId);
-            cuenta.Depositar(monto, propietario);
+            cuenta.Depositar(monto);
 
             // Guardar los eventos generados
             foreach (var evento in cuenta.ObtenerEventos())
@@ -51,10 +50,10 @@ namespace Isra.Demos.Microservicios.Servicios
         /// <param name="monto"></param>
         /// <param name="propietario"></param>
         /// <returns></returns>
-        public async Task RetirarAsync(Guid cuentaId, decimal monto, string propietario)
+        public async Task RetirarAsync(Guid cuentaId, decimal monto)
         {
             var cuenta = await ObtenerCuentaAsync(cuentaId);
-            cuenta.Retirar(monto, propietario);
+            cuenta.Retirar(monto);
 
             // Guardar los eventos generados
             foreach (var evento in cuenta.ObtenerEventos())
@@ -72,7 +71,8 @@ namespace Isra.Demos.Microservicios.Servicios
         /// <returns></returns>
         public async Task<CuentaBancaria> ObtenerCuentaAsync(Guid cuentaId)
         {
-            var cuenta = new CuentaBancaria(cuentaId);
+            var cuenta = new CuentaBancaria(cuentaId, this);
+
             var eventos = await _repositorioEventos.ObtenerEventosPorAgregadoAsync(cuentaId);
 
             if (eventos.Any())
@@ -85,38 +85,26 @@ namespace Isra.Demos.Microservicios.Servicios
 
         /// <summary>
         /// Transfiere dinero de una cuenta a otra
+        /// Se efectúa solamente el evento del dinero enviado, es otro servicio quien recibe el evento y procesa el deposito
         /// </summary>
         /// <param name="cuentaOrigenId"></param>
         /// <param name="cuentaDestinoId"></param>
         /// <param name="monto"></param>
-        /// <param name="propietarioOrigen"></param>
-        /// <param name="propietarioDestino"></param>
         /// <returns></returns>
-        public async Task TransferirAsync(Guid cuentaOrigenId, Guid cuentaDestinoId, decimal monto, string propietarioOrigen, string propietarioDestino)
+        public async Task TransferirAsync(Guid cuentaOrigenId, Guid cuentaDestinoId, decimal monto)
         {
             var cuentaOrigen = await ObtenerCuentaAsync(cuentaOrigenId);
-            var cuentaDestino = await ObtenerCuentaAsync(cuentaDestinoId);
 
             if (cuentaOrigen.Version == 0)
                 throw new ArgumentException("La cuenta de origen no existe o no ha sido inicializada.");
-                
-            if (cuentaDestino.Version == 0)
-                throw new ArgumentException("La cuenta destino no existe o no ha sido inicializada.");
 
-            cuentaOrigen.Retirar(monto, propietarioOrigen);
-            cuentaDestino.Depositar(monto, propietarioDestino ?? cuentaDestino.Propietario);
+            await cuentaOrigen.TransferirDineroACuentaAsync(cuentaDestinoId, monto);
 
             foreach (var evento in cuentaOrigen.ObtenerEventos())
             {
                 await _repositorioEventos.GuardarEventoAsync(evento);
             }
             cuentaOrigen.LimpiarEventos();
-
-            foreach (var evento in cuentaDestino.ObtenerEventos())
-            {
-                await _repositorioEventos.GuardarEventoAsync(evento);
-            }
-            cuentaDestino.LimpiarEventos();
         }
     }
 }

@@ -1,6 +1,6 @@
 using Confluent.Kafka;
 using Dapper;
-using Isra.Demos.Microservicios.Modelo;
+using Isra.Demos.Microservicios.EstadoCuenta.Modelo;
 using Microsoft.Data.SqlClient;
 using System.Text.Json;
 
@@ -13,22 +13,26 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
     {
         private readonly string _connectionString;
         private readonly IConsumer<string, string> _consumer;
+        private readonly IConfiguration _configuration;
 
         /// <summary>
         /// Constructor del servicio, que inicializa la conexión a la base de datos y el consumidor de Kafka.
         /// </summary>
-        public EstadoCuentaConsumerService()
+        public EstadoCuentaConsumerService(IConfiguration configuration)
         {
-            _connectionString = Constantes.SQLServerConnectionString;
+            _configuration = configuration;
+
+            _connectionString = _configuration.GetValue<string>("ConnectionStrings:SQLServerEstadoCuentaConnectionString");
 
             var config = new ConsumerConfig
             {
-                BootstrapServers = Constantes.KafkaBootstrapServers,
+                BootstrapServers = _configuration.GetValue<string>("Kafka:BootstrapServers"),
                 GroupId = "cuenta-estado-consumer-group",
                 AutoOffsetReset = AutoOffsetReset.Earliest
             };
 
             _consumer = new ConsumerBuilder<string, string>(config).Build();
+            
         }
 
         /// <summary>
@@ -40,7 +44,7 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
         {
             return Task.Run(async () =>
             {
-                _consumer.Subscribe(Constantes.KafkaTopic);
+                _consumer.Subscribe(_configuration.GetValue<string>("Kafka:Topic"));
 
                 while (!stoppingToken.IsCancellationRequested)
                 {
@@ -63,7 +67,7 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
 
                                 await RegistrarMovimiento(deposito, "Deposito");
 
-                                Console.WriteLine($"Deposito: {deposito.Propietario} {deposito.Monto}");
+                                Console.WriteLine($"Deposito: {deposito.AggregateId} {deposito.Monto}");
                                 break;
 
                             case "DineroRetiradoEvento":
@@ -71,9 +75,35 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
 
                                 await RegistrarMovimiento(retiro, "Retiro");
 
-                                Console.WriteLine($"Retiro: {retiro.Propietario} {retiro.Monto}");
+                                Console.WriteLine($"Retiro: {retiro.AggregateId} {retiro.Monto}");
                                 break;
 
+                            case "TransferenciaRealizadaEvento":
+                                var envioTransferencia = JsonSerializer.Deserialize<TransferenciaRealizadaEvento>(eventoJson);
+
+                                await RegistrarMovimiento(envioTransferencia, "Envío de dinero transferencia");
+
+                                Console.WriteLine($"Envío de transferencia: {envioTransferencia.AggregateId} {envioTransferencia.Monto}");
+                                break;
+
+                            case "TransferenciaRecibidaEvento":
+                                var recepcionTransferencia = JsonSerializer.Deserialize<TransferenciaRealizadaEvento>(eventoJson);
+
+                                await RegistrarMovimiento(recepcionTransferencia, "Envío de dinero transferencia");
+
+                                Console.WriteLine($"Recepción de transferencia: {recepcionTransferencia.AggregateId} {recepcionTransferencia.Monto}");
+
+                                break;
+
+                            case "TransferenciaDevueltaEvento":
+                                var devolucionTransferencia = JsonSerializer.Deserialize<TransferenciaDevueltaEvento>(eventoJson);
+
+                                await RegistrarMovimiento(devolucionTransferencia, "Envío de dinero transferencia");
+
+                                Console.WriteLine($"Devolución de transferencia: {devolucionTransferencia.AggregateId} {devolucionTransferencia.Monto}");
+
+                                break;
+                            
                             default:
                                 break;
                         }
@@ -102,8 +132,8 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
             string sql = @"
             IF NOT EXISTS (SELECT 1 FROM MovimientosCuenta WHERE AggregateId = @AggregateId AND Version = @Version)
             BEGIN
-                INSERT INTO MovimientosCuenta (AggregateId, TipoMovimiento, Monto, Propietario, Version)
-                VALUES (@AggregateId, @Tipo, @Monto, @Propietario, @Version)
+                INSERT INTO MovimientosCuenta (AggregateId, TipoMovimiento, Monto, Version)
+                VALUES (@AggregateId, @Tipo, @Monto, @Version)
             END";
 
             await conn.ExecuteAsync(sql, new
@@ -111,7 +141,6 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
                 AggregateId = evento.AggregateId,
                 Tipo = tipo,
                 Monto = evento.Monto,
-                Propietario = evento.Propietario,
                 Version = evento.Version
             });
         }

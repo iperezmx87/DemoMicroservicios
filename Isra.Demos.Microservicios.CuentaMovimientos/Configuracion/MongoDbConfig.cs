@@ -1,4 +1,4 @@
-﻿using Isra.Demos.Microservicios.Modelo;
+﻿using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 using MongoDB.Bson.Serialization;
 
 namespace Isra.Demos.Microservicios.CuentaMovimientos.Configuracion
@@ -23,6 +23,10 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Configuracion
             BsonClassMap.RegisterClassMap<DineroDepositadoEvento>();
 
             BsonClassMap.RegisterClassMap<DineroRetiradoEvento>();
+
+            BsonClassMap.RegisterClassMap<TransferenciaRealizadaEvento>();
+
+            BsonClassMap.RegisterClassMap<TransferenciaDevueltaEvento>();
         }
     }
 }

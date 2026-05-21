@@ -1,6 +1,6 @@
 ﻿using Confluent.Kafka;
-using Isra.Demos.Microservicios.Modelo;
-using Microsoft.Extensions.Primitives;
+using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace Isra.Demos.Microservicios.Servicios
@@ -12,15 +12,18 @@ namespace Isra.Demos.Microservicios.Servicios
         : IColaMensajesService
     {
         private readonly IProducer<string, string> _producer;
+        private readonly IConfiguration _configuration;
 
         /// <summary>
         /// Constructor que inicializa el productor de Kafka
         /// </summary>
-        public KafkaColaMensajesService()
+        public KafkaColaMensajesService(IConfiguration configuration)
         {
+            _configuration = configuration;
+
             var config = new ProducerConfig
             {
-                BootstrapServers = Constantes.KafkaBootstrapServers
+                BootstrapServers = _configuration["Kafka:BootstrapServers"]
             };
 
             _producer = new ProducerBuilder<string, string>(config).Build();
@@ -52,14 +55,42 @@ namespace Isra.Demos.Microservicios.Servicios
             return await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
         }
 
+        /// <summary>
+        /// Publica el mensaje de envio de transferencia en la cola
+        /// </summary>
+        /// <param name="evento"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<Tuple<string, string>> PublicarTransferenciaDevueltaEventoAsync(
+            TransferenciaDevueltaEvento evento)
+        {
+            var mensaje = JsonSerializer.Serialize(evento);
+
+            return await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
+        }
+
+        /// <summary>
+        /// Publica el mensaje de devolución de transferencia en la cola
+        /// </summary>
+        /// <param name="evento"></param>
+        /// <returns></returns>
+        public async Task<Tuple<string, string>> PublicarTransferenciaRealizadaEventoAsync(
+            TransferenciaRealizadaEvento evento)
+        {
+            var mensaje = JsonSerializer.Serialize(evento);
+
+            return await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
+        }
+
         private async Task<Tuple<string, string>> PublicarEventoAsync(string llave, string mensaje)
         {
             var resultado =
-                 await _producer.ProduceAsync(Constantes.KafkaTopic, new Message<string, string>
-                 {
-                     Key = llave,
-                     Value = mensaje
-                 });
+                 await _producer.ProduceAsync(
+                     _configuration.GetValue<string>("Kafka:Topic"), new Message<string, string>
+                     {
+                         Key = llave,
+                         Value = mensaje
+                     });
 
             return Tuple.Create(resultado.Topic, Enum.GetName(resultado.Status));
         }

@@ -1,4 +1,4 @@
-﻿using Isra.Demos.Microservicios.Modelo;
+﻿using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 
 namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
 {

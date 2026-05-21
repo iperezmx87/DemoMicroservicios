@@ -32,14 +32,13 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
         {
             try
             {
-                await _cuentaService.DepositarAsync(cuentaId, request.Monto, request.Propietario);
+                await _cuentaService.DepositarAsync(cuentaId, request.Monto);
                 var cuenta = await _cuentaService.ObtenerCuentaAsync(cuentaId);
                 return Ok(new
                 {
                     mensaje = "Depósito realizado exitosamente",
                     cuentaId,
-                    saldoActual = cuenta.Saldo,
-                    cuenta.Propietario
+                    saldoActual = cuenta.Saldo
                 });
             }
             catch (ArgumentException ex)
@@ -60,14 +59,13 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
         {
             try
             {
-                await _cuentaService.RetirarAsync(cuentaId, request.Monto, request.Propietario);
+                await _cuentaService.RetirarAsync(cuentaId, request.Monto);
                 var cuenta = await _cuentaService.ObtenerCuentaAsync(cuentaId);
                 return Ok(new
                 {
                     mensaje = "Retiro realizado exitosamente",
                     cuentaId,
-                    saldoActual = cuenta.Saldo,
-                    cuenta.Propietario
+                    saldoActual = cuenta.Saldo
                 });
             }
             catch (ArgumentException ex)
@@ -93,15 +91,13 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
             try
             {
                 await _cuentaService.TransferirAsync(
-                    request.CuentaOrigenId, 
-                    request.CuentaDestinoId, 
-                    request.Monto, 
-                    request.PropietarioOrigen, 
-                    request.PropietarioDestino
+                    request.CuentaOrigenId,
+                    request.CuentaDestinoId,
+                    request.Monto
                 );
 
                 var cuentaOrigen = await _cuentaService.ObtenerCuentaAsync(request.CuentaOrigenId);
-                
+
                 return Ok(new
                 {
                     mensaje = "Transferencia realizada exitosamente",

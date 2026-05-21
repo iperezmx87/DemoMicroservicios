@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using Isra.Demos.Microservicios.Modelo;
 using Isra.Demos.Microservicios.WebApi.Contratos;
 using Isra.Demos.Microservicios.WebApi.Modelo;
 using Microsoft.Data.SqlClient;
@@ -14,14 +13,16 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
         private readonly string _connecionString;
         private readonly string _cnnTblUsuarios;
         private readonly ISaldoRepositorio _saldoRepositorio;
+        private readonly IConfiguration _configuration;
 
         /// <summary>
         /// Constructor del repositorio de estado de cuenta, se encarga de inicializar la conexión a la base de datos utilizando la cadena de conexión definida en las constantes.
         /// </summary>
-        public EstadoCuentaRepositorio(ISaldoRepositorio saldoRepositorio)
+        public EstadoCuentaRepositorio(ISaldoRepositorio saldoRepositorio, IConfiguration configuration)
         {
-            _connecionString = Constantes.SQLServerConnectionString;
-            _cnnTblUsuarios = Constantes.SqlServerBancoCuentasConnectionString;
+            _configuration = configuration;
+            _connecionString = _configuration.GetValue<string>("ConnectionStrings:SQLServerEstadoCuentaConnectionString");
+            _cnnTblUsuarios = _configuration.GetValue<string>("ConnectionStrings:SqlServerBancoCuentasConnectionString");
             _saldoRepositorio = saldoRepositorio;
         }
 
@@ -42,7 +43,7 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
             // obtiene los movimientos de la cuenta
             var movimientos =
                 await connection.QueryAsync<CuentaMovimientoDto>(
-                    "SELECT TipoMovimiento, Monto, FechaEvento, Propietario FROM MovimientosCuenta WHERE AggregateId = @AggregateId order by FechaEvento desc",
+                    "SELECT TipoMovimiento, Monto, FechaEvento FROM MovimientosCuenta WHERE AggregateId = @AggregateId order by FechaEvento desc",
                     new { AggregateId = aggregateId });
 
             if (movimientos.Any())

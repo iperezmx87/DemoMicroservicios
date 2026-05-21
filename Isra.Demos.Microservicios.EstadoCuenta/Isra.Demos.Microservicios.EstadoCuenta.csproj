@@ -13,17 +13,14 @@
 		<PackageReference Include="Dapper" Version="2.1.72" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.4" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Isra.Demos.Microservicios.Modelo\Isra.Demos.Microservicios.Modelo.csproj" />
+		<PackageReference Include="MongoDB.Driver" Version="3.1.0" />
 	</ItemGroup>
 
 	<!-- Configuración de empaquetado para docker -->
 	<PropertyGroup>
 		<RootNamespace>Isra.Demos.Microservicios.EstadoCuenta</RootNamespace>
 		<ContainerRepository>pesimx87/isra-microservicios-estado-cuenta</ContainerRepository>
-		<ContainerImageTag>1.1.5</ContainerImageTag>
+		<ContainerImageTag>1.1.6</ContainerImageTag>
 		<ContainerRegistry>docker.io</ContainerRegistry>
 		<ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0</ContainerBaseImage>
 		<ContainerPort>8073</ContainerPort>

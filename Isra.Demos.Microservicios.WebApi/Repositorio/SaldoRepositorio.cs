@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using Isra.Demos.Microservicios.Modelo;
 using Isra.Demos.Microservicios.WebApi.Contratos;
 using Npgsql;
 
@@ -11,13 +10,15 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
     public class SaldoRepositorio : ISaldoRepositorio
     {
         private readonly string _connectionString;
+        private readonly IConfiguration _configuration;
 
         /// <summary>
         /// Constructor que inicializa la cadena de conexión a la base de datos PostgreSQL utilizando una constante definida en el proyecto.
         /// </summary>
-        public SaldoRepositorio()
+        public SaldoRepositorio(IConfiguration configuration)
         {
-            _connectionString = Constantes.PostgresConnectionString;
+            _configuration = configuration;
+            _connectionString = _configuration.GetValue<string>("ConnectionStrings:PostgresSaldoConnection");
         }
 
         /// <summary>

@@ -45,10 +45,5 @@
         /// Fecha del movimiento
         /// </summary>
         public DateTimeOffset FechaEvento { get; set; }
-
-        /// <summary>
-        /// Propietario de la cuenta, se utiliza para mostrar el nombre del propietario de la cuenta bancaria en el estado de cuenta
-        /// </summary>
-        public string Propietario { get; set; }
     }
 }

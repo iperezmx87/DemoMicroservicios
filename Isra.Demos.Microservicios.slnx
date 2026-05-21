@@ -1,7 +1,4 @@
 <Solution>
-  <Folder Name="/Modelo/">
-    <Project Path="Isra.Demos.Microservicios.Modelo/Isra.Demos.Microservicios.Modelo.csproj" />
-  </Folder>
   <Folder Name="/Movimientos cuenta/">
     <Project Path="Isra.Demos.Microservicios.CuentaMovimientos/Isra.Demos.Microservicios.CuentaMovimientos.csproj" />
   </Folder>

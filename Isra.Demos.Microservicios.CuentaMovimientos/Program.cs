@@ -1,7 +1,6 @@
 using Isra.Demos.Microservicios.CuentaMovimientos;
 using Isra.Demos.Microservicios.CuentaMovimientos.Configuracion;
 using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
-using Isra.Demos.Microservicios.Modelo;
 using Isra.Demos.Microservicios.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -50,11 +49,10 @@ builder.Services.AddAuthorization();
 MongoDbConfig.RegistrarMapeos();
 
 // Configurar MongoDB
-var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb")
-                            ?? Constantes.MongoDbConnectionString;
+var mongoConnectionString = builder.Configuration.GetValue("MongoDB:ConnectionString", "mongodb://localhost:27017");
 
 var mongoClient = new MongoClient(mongoConnectionString);
-var mongoDatabase = mongoClient.GetDatabase(Constantes.EventStoreDatabaseName);
+var mongoDatabase = mongoClient.GetDatabase(builder.Configuration.GetValue("MongoDB:DatabaseName", "bd_cuentas_movimientos"));
 
 // Registrar servicios y repositorios
 builder.Services.AddSingleton<IMongoClient, MongoClient>();

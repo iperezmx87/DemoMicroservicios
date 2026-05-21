@@ -14,15 +14,11 @@
 		<PackageReference Include="MongoDB.Driver" Version="3.1.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\Isra.Demos.Microservicios.Modelo\Isra.Demos.Microservicios.Modelo.csproj" />
-	</ItemGroup>
-
 	<!-- Configuración de empaquetado para docker -->
 	<PropertyGroup>
 		<RootNamespace>Isra.Demos.Microservicios.CuentaMovimientos</RootNamespace>
 		<ContainerRepository>pesimx87/isra-microservicios-cuenta-movimientos</ContainerRepository>
-		<ContainerImageTag>1.1.5</ContainerImageTag>
+		<ContainerImageTag>1.1.6</ContainerImageTag>
 		<ContainerRegistry>docker.io</ContainerRegistry>
 		<ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0</ContainerBaseImage>
 		<ContainerPort>8070</ContainerPort>

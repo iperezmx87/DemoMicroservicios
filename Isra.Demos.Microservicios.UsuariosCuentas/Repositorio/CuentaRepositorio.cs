@@ -1,5 +1,4 @@
 using Dapper;
-using Isra.Demos.Microservicios.Modelo;
 using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -16,9 +15,10 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
         /// <summary>
         /// Constructor de la clase CuentaRepositorio, que inicializa la cadena de conexión a la base de datos utilizando una constante definida en la clase Constantes. Esta cadena de conexión es fundamental para establecer la comunicación entre la aplicación y la base de datos SQL Server, permitiendo así el almacenamiento y recuperación de información relacionada con las cuentas bancarias y otros datos relevantes para el funcionamiento del sistema. Al utilizar una cadena de conexión local, se facilita el desarrollo y las pruebas de la aplicación en un entorno controlado, aunque en un entorno de producción se recomendaría utilizar una configuración más robusta y segura para la conexión a la base de datos.
         /// </summary>
-        public CuentaRepositorio()
+        public CuentaRepositorio(
+            IConfiguration configuration)
         {
-            _connectionString = Constantes.SqlServerBancoCuentasConnectionString;
+            _connectionString = configuration.GetConnectionString("SqlServerBancoCuentasConnectionString");
         }
 
         /// <summary>

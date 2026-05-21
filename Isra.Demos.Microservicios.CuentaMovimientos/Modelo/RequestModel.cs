@@ -9,11 +9,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         /// Monto de la 
         /// </summary>
         public decimal Monto { get; set; }
-
-        /// <summary>
-        /// Propietario de la cuenta
-        /// </summary>
-        public string Propietario { get; set; }
     }
 
     /// <summary>
@@ -35,15 +30,5 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         /// Monto a transferir
         /// </summary>
         public decimal Monto { get; set; }
-
-        /// <summary>
-        /// Propietario de la cuenta que envía el dinero
-        /// </summary>
-        public string PropietarioOrigen { get; set; }
-
-        /// <summary>
-        /// Propietario de la cuenta que recibe el dinero (opcional)
-        /// </summary>
-        public string PropietarioDestino { get; set; }
     }
 }
