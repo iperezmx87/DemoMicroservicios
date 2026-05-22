@@ -134,6 +134,11 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
                     Version = dineroRetirado.Version;
                     break;
 
+                case TransferenciaRecibidaEvento transferenciaRecibida:
+                    Saldo += transferenciaRecibida.Monto;
+                    Version = transferenciaRecibida.Version;
+                    break;
+
                 case TransferenciaRealizadaEvento transferenciaRealizada:
                     Saldo -= transferenciaRealizada.Monto;
                     Version = transferenciaRealizada.Version;
