@@ -42,6 +42,16 @@
         public string TipoMovimiento { get; set; }
 
         /// <summary>
+        /// Se coloca el motivo de la devolución
+        /// </summary>
+        public string MotivoDevolucion { get; set; }
+
+        /// <summary>
+        /// Se coloca el propietario de la transferencia destino
+        /// </summary>
+        public string PropietarioTransferenciaDestino { get; set; }
+
+        /// <summary>
         /// Fecha del movimiento
         /// </summary>
         public DateTimeOffset FechaEvento { get; set; }

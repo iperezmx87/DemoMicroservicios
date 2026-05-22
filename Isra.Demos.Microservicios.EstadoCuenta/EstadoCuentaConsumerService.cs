@@ -131,16 +131,17 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
             string sql = @"
             IF NOT EXISTS (SELECT 1 FROM MovimientosCuenta WHERE AggregateId = @AggregateId AND Version = @Version)
             BEGIN
-                INSERT INTO MovimientosCuenta (AggregateId, TipoMovimiento, Monto, Version)
-                VALUES (@AggregateId, @Tipo, @Monto, @Version)
+                INSERT INTO MovimientosCuenta (AggregateId, TipoMovimiento, Monto, Version, MotivoDevolucion)
+                VALUES (@AggregateId, @Tipo, @Monto, @Version, @MotivoDevolucion)
             END";
 
             await conn.ExecuteAsync(sql, new
             {
-                AggregateId = evento.AggregateId,
+                evento.AggregateId,
                 Tipo = tipo,
-                Monto = evento.Monto,
-                Version = evento.Version
+                evento.Monto,
+                evento.Version,
+                evento.MotivoDevolucion
             });
         }
     }

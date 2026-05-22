@@ -43,7 +43,10 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
             // obtiene los movimientos de la cuenta
             var movimientos =
                 await connection.QueryAsync<CuentaMovimientoDto>(
-                    "SELECT TipoMovimiento, Monto, FechaEvento FROM MovimientosCuenta WHERE AggregateId = @AggregateId order by FechaEvento desc",
+                    @"SELECT TipoMovimiento, Monto, FechaEvento, 
+                      ISNULL(MotivoDevolucion, '') as MotivoDevolucion 
+                      FROM MovimientosCuenta(NOLOCK) 
+                      WHERE AggregateId = @AggregateId order by FechaEvento desc",
                     new { AggregateId = aggregateId });
 
             if (movimientos.Any())
@@ -71,7 +74,9 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
 
             // obtener los datos de la tabla TblCuentasUsuario
             var cuentaUsuario = await connection.QueryFirstOrDefaultAsync<CuentaDto>(
-                "SELECT IdCuenta AggregateId, Propietario FROM TblCuentasUsuario WHERE IdCuenta = @AggregateId",
+                @"SELECT IdCuenta AggregateId, Propietario 
+                  FROM TblCuentasUsuario (NOLOCK)
+                  WHERE IdCuenta = @AggregateId",
                 new { AggregateId = aggregateId });
 
             return cuentaUsuario;

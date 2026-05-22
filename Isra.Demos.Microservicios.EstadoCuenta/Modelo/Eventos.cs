@@ -14,6 +14,11 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
         public decimal Monto { get; set; }
 
         /// <summary>
+        /// Motivo por el cual se devuelve el dinero
+        /// </summary>
+        public string MotivoDevolucion { get; set; }
+
+        /// <summary>
         /// Constructor para inicializar el evento con los datos necesarios
         /// </summary>
         /// <param name="id"></param>
@@ -43,6 +48,11 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
         /// Monto a retirar
         /// </summary>
         public decimal Monto { get; set; }
+
+        /// <summary>
+        /// Motivo por el cual se devuelve el dinero
+        /// </summary>
+        public string MotivoDevolucion { get; set; }
 
         /// <summary>
         /// Constructor para inicializar el evento con los datos necesarios
@@ -79,6 +89,11 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
         /// Cuenta destino a la que se realizará la transferencia. Esta propiedad es crucial para identificar la cuenta receptora de los fondos transferidos, lo que permite que el sistema pueda actualizar correctamente el saldo de la cuenta destino y garantizar que la transferencia se procese de manera adecuada. Al incluir esta información en el evento, se facilita la trazabilidad de las transacciones y se asegura que todas las partes involucradas en la transferencia tengan acceso a los detalles necesarios para su correcta ejecución y registro.
         /// </summary>
         public Guid CuentaDestinoId { get; set; }
+
+        /// <summary>
+        /// Motivo por el cual se devuelve el dinero
+        /// </summary>
+        public string MotivoDevolucion { get; set; }
 
         /// <summary>
         /// Constructor para inicializar el evento con los datos necesarios. Este constructor es esencial para garantizar que el evento se cree con toda la información relevante desde el momento de su instanciación, lo que facilita su uso en el proceso de transferencia de fondos. Al proporcionar un constructor que acepta los parámetros necesarios, se asegura que el evento se construya de manera consistente y que todos los datos importantes estén disponibles para su procesamiento posterior en el sistema.
@@ -118,6 +133,11 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
         /// </summary>
         [BsonGuidRepresentation(GuidRepresentation.Standard)]
         public Guid CuentaDestinoId { get; set; }
+
+        /// <summary>
+        /// Motivo por el cual se devuelve el dinero
+        /// </summary>
+        public string MotivoDevolucion { get; set; }
 
         /// <summary>
         /// Constructor para inicializar el evento con los datos necesarios. Este constructor es esencial para garantizar que el evento se cree con toda la información relevante desde el momento de su instanciación, lo que facilita su uso en el proceso de recepción de transferencias. Al proporcionar un constructor que acepta los parámetros necesarios, se asegura que el evento se construya de manera consistente y que todos los datos importantes estén disponibles para su procesamiento posterior en el sistema.
@@ -161,6 +181,11 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
         public Guid CuentaOrigenId { get; set; }
 
         /// <summary>
+        /// Motivo por el cual se devuelve el dinero
+        /// </summary>
+        public string MotivoDevolucion { get; set; }
+
+        /// <summary>
         /// constructor para inicializar el evento con los datos necesarios. Este constructor es esencial para garantizar que el evento se cree con toda la información relevante desde el momento de su instanciación, lo que facilita su uso en el proceso de manejo de errores durante las transferencias. Al proporcionar un constructor que acepta los parámetros necesarios, se asegura que el evento se construya de manera consistente y que todos los datos importantes estén disponibles para su procesamiento posterior en el sistema, permitiendo así una gestión efectiva de las transferencias fallidas y la restauración del estado original de las cuentas involucradas.
         /// </summary>
         /// <param name="id">Id cuenta receptora de la transferencia</param>
@@ -168,7 +193,9 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
         /// <param name="monto">Monto a devolver</param>
         /// <param name="cuentaOrigenId">Id de la cuenta de origen</param>
         /// <param name="version">Versión del evento</param>
-        public TransferenciaDevueltaEvento(Guid id, Guid idTransferenciaOrigen, decimal monto, Guid cuentaOrigenId, int version)
+        public TransferenciaDevueltaEvento(
+            Guid id, Guid idTransferenciaOrigen,
+            decimal monto, Guid cuentaOrigenId, int version)
         {
             AggregateId = id;
             IdTransferenciaOrigen = idTransferenciaOrigen;

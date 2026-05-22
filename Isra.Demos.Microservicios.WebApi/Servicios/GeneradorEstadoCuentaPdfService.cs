@@ -4,6 +4,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System.Globalization;
+using System.Text;
 
 namespace Isra.Demos.Microservicios.WebApi.Servicios
 {
@@ -99,14 +100,27 @@ namespace Isra.Demos.Microservicios.WebApi.Servicios
                             foreach (var m in cuenta.Movimientos)
                             {
                                 table.Cell().Element(RowStyle).Text(m.FechaEvento.ToString("dd/MM/yyyy HH:mm"));
-                                table.Cell().Element(RowStyle).Text(m.TipoMovimiento);
+
+                                if (m.TipoMovimiento == "Devolución de dinero transferencia")
+                                {
+                                    // se carga el motivo de devolución en la descripción del movimiento
+                                    StringBuilder descripcion = new StringBuilder();
+                                    descripcion.AppendLine(m.TipoMovimiento);
+                                    descripcion.AppendLine(m.MotivoDevolucion ?? "Desconocido");
+
+                                    table.Cell().Element(RowStyle).Text(descripcion.ToString());
+                                }
+                                else
+                                {
+                                    table.Cell().Element(RowStyle).Text(m.TipoMovimiento);
+                                }
 
                                 var montoTexto = m.Monto.ToString("C");
 
                                 table.Cell().Element(RowStyle).AlignRight().Text(montoTexto)
-                                     .FontColor(m.TipoMovimiento == "Deposito" 
+                                     .FontColor(m.TipoMovimiento == "Deposito"
                                      || m.TipoMovimiento == "Recepción de dinero transferencia"
-                                     || m.TipoMovimiento == "Devolución de transferencia" ? Colors.Green.Medium : Colors.Red.Medium);
+                                     || m.TipoMovimiento == "Devolución de dinero transferencia" ? Colors.Green.Medium : Colors.Red.Medium);
 
                                 static IContainer RowStyle(IContainer container) => container.PaddingVertical(3).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
                             }
