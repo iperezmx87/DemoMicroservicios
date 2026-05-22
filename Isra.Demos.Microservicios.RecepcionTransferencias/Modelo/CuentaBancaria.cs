@@ -140,7 +140,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
                     break;
 
                 case TransferenciaDevueltaEvento transferenciaDevuelta:
-                    Saldo -= transferenciaDevuelta.Monto;
+                    Saldo += transferenciaDevuelta.Monto;
                     Version = transferenciaDevuelta.Version;
                     break;
             }
