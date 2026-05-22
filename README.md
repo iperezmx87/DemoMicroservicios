@@ -53,7 +53,153 @@ A diferencia de implementaciones convencionales, este proyecto resuelve retos cr
 5.  **Proyección de Historial:** Simultáneamente, otro consumidor registra el movimiento detallado en **SQL Server**.
 6.  **Query:** El usuario consulta su estado de cuenta; el sistema recupera los datos proyectados y genera un PDF profesional mediante **QuestPDF**.
 
+## 🗺️ Diagrama de Arquitectura y Flujos
+
+### Diagrama de Componentes y Capas (CQRS & Outbox)
+```mermaid
+graph TD
+    classDef api fill:#4A90E2,stroke:#1F4E79,stroke-width:2px,color:#fff;
+    classDef worker fill:#50E3C2,stroke:#208B74,stroke-width:2px,color:#000;
+    classDef db fill:#F5A623,stroke:#A05E03,stroke-width:2px,color:#000;
+    classDef broker fill:#D0021B,stroke:#7D010B,stroke-width:2px,color:#fff;
+
+    Cliente((Cliente / Web App)) -->|1. HTTP Post: Transferir| WebApi[WebApi]:::api
+    
+    subgraph Lado de Escritura - Cuenta Movimientos
+        WebApi -->|2. Delegación| CuentaMovimientos[CuentaMovimientos]:::api
+        CuentaMovimientos -->|3. Transacción Multi-documento| MongoES[(MongoDB EventStore)]:::db
+        CuentaMovimientos -->|3. Transacción Multi-documento| MongoOB[(MongoDB Outbox)]:::db
+        
+        RelayCM[ProcesadorMensajesSalidaService]:::worker -->|4. Polling Outbox| MongoOB
+        RelayCM -->|5. Publicar| Kafka((Kafka Broker)):::broker
+    end
+
+    subgraph Broker de Mensajes
+        Kafka -- "Topic: cuentas_movimientos_eventos" --> ConsumidorSaga
+    end
+
+    subgraph Saga - Recepción de Transferencias
+        ConsumidorSaga[ReceptorTransferenciasConsumerService]:::worker -->|6. Consume TransferenciaRealizadaEvento| RecepcionTransferencias[RecepcionTransferencias]:::api
+        RecepcionTransferencias -->|7. Validar Cuenta Destino| MongoES
+        
+        RecepcionTransferencias -->|8a. Caso Exitoso| AcreditarDestino[Acreditar en Destino]:::worker
+        AcreditarDestino -->|9a. Guardar TransferenciaRecibidaEvento| MongoOB
+        
+        RecepcionTransferencias -->|8b. Caso Fallido: Cuenta No Existe| CancelarTransferencia[Registrar Devolución]:::worker
+        CancelarTransferencia -->|9b. Guardar TransferenciaDevueltaEvento| MongoOB
+        
+        RelayRT[ProcesadorMensajesSalidaService RT]:::worker -->|10. Polling Outbox| MongoOB
+        RelayRT -->|11. Publicar Evento Saga| Kafka
+    end
+
+    subgraph Lado de Lectura - Proyecciones y Queries
+        Kafka -->|12. Consumir Eventos| SaldoConsumer[SaldoConsumerService]:::worker
+        SaldoConsumer -->|13. Actualizar Upsert Idempotente| Postgres[(PostgreSQL Saldo)]:::db
+        
+        Kafka -->|12. Consumir Eventos| EstadoCuentaConsumer[EstadoCuentaConsumerService]:::worker
+        EstadoCuentaConsumer -->|13. Insertar Movimiento Idempotente| SqlServerEC[(SQL Server EstadoCuenta)]:::db
+        
+        WebApi -->|Query Saldo| Postgres
+        WebApi -->|Query PDF Estado Cuenta| SqlServerEC
+    end
+
+    subgraph Identidad
+        WebApi -->|Autenticar JWT| UsuariosCuentas[UsuariosCuentas]:::api
+        UsuariosCuentas -->|Validar credenciales / crear| SqlServerIdentity[(SQL Server Usuarios)]:::db
+    end
+```
+
+### Diagrama de Secuencia de la Saga (Flujo de Devolución)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Cliente
+    participant CM as CuentaMovimientos (Origen)
+    participant DB as MongoDB (EventStore & Outbox)
+    participant Broker as Kafka (Topic Eventos)
+    participant RT as RecepcionTransferencias (Destino)
+    participant Saldo as Saldo (Postgres)
+    participant Historial as EstadoCuenta (SQL Server)
+
+    Cliente->>CM: POST /api/cuentas/transferir (Origen, Destino, Monto)
+    Note over CM: Valida saldo suficiente
+    CM->>DB: Iniciar Transacción MongoDB
+    DB-->>CM: OK
+    Note over CM: Crea: TransferenciaRealizadaEvento
+    CM->>DB: Guardar Evento en EventStore & Mensaje en Outbox
+    CM->>DB: Commit Transacción
+    Note over CM: El saldo origen se reduce temporalmente
+
+    rect rgb(240, 240, 240)
+        Note over CM: ProcesadorMensajesSalida (Background Relay)
+        CM->>DB: Leer mensajes Outbox no procesados
+        DB-->>CM: Retorna TransferenciaRealizadaEvento
+        CM->>Broker: Publicar TransferenciaRealizadaEvento
+        CM->>DB: Marcar mensaje como Procesado (Processed = true)
+    end
+
+    Broker->>Saldo: Consume TransferenciaRealizadaEvento
+    Saldo->>Saldo: Resta saldo en PostgreSQL (Origen)
+    Broker->>Historial: Consume TransferenciaRealizadaEvento
+    Historial->>Historial: Registra movimiento "Envío de transferencia"
+
+    Broker->>RT: Consume TransferenciaRealizadaEvento
+    Note over RT: Valida si cuenta destino existe en MongoDB
+    
+    alt Cuenta Destino No Existe (Compensación)
+        Note over RT: ERROR: Cuenta destino inexistente
+        RT->>DB: Guardar TransferenciaDevueltaEvento en Outbox (Version = 0)
+        
+        rect rgb(240, 240, 240)
+            Note over RT: ProcesadorMensajesSalida (Background Relay RT)
+            RT->>DB: Leer mensajes Outbox no procesados
+            RT->>Broker: Publicar TransferenciaDevueltaEvento (Version = 0)
+            RT->>DB: Marcar mensaje como Procesado
+        end
+        
+        Broker->>CM: Consume TransferenciaDevueltaEvento (Version = 0)
+        Note over CM: Verifica que no haya sido procesada antes (Idempotencia)
+        CM->>DB: Iniciar Transacción MongoDB
+        Note over CM: Crea TransferenciaDevueltaEvento (Version = VersionOrigen + 1)
+        CM->>DB: Guardar Evento en EventStore & Mensaje en Outbox (Version oficial)
+        CM->>DB: Commit Transacción
+        Note over CM: El saldo origen se restaura (reembolso exitoso)
+        
+        rect rgb(240, 240, 240)
+            Note over CM: ProcesadorMensajesSalida (Background Relay)
+            CM->>DB: Leer mensajes Outbox
+            CM->>Broker: Publicar TransferenciaDevueltaEvento (Version oficial)
+            CM->>DB: Marcar mensaje como Procesado
+        end
+        
+        Broker->>Saldo: Consume TransferenciaDevueltaEvento (Version oficial)
+        Saldo->>Saldo: Suma saldo en PostgreSQL (Reembolso en Origen)
+        Broker->>Historial: Consume TransferenciaDevueltaEvento (Version oficial)
+        Historial->>Historial: Registra movimiento "Devolución de dinero transferencia"
+        
+    else Cuenta Destino Existe (Flujo Exitoso)
+        Note over RT: Cuenta destino válida
+        RT->>DB: Iniciar Transacción MongoDB
+        Note over RT: Crea TransferenciaRecibidaEvento (Version = VersionDestino + 1)
+        RT->>DB: Guardar Evento en EventStore & Mensaje en Outbox
+        RT->>DB: Commit Transacción
+        
+        rect rgb(240, 240, 240)
+            Note over RT: ProcesadorMensajesSalida (Background Relay RT)
+            RT->>DB: Leer mensajes Outbox
+            RT->>Broker: Publicar TransferenciaRecibidaEvento
+            RT->>DB: Marcar mensaje como Procesado
+        end
+        
+        Broker->>Saldo: Consume TransferenciaRecibidaEvento
+        Saldo->>Saldo: Suma saldo en PostgreSQL (Destino)
+        Broker->>Historial: Consume TransferenciaRecibidaEvento
+        Historial->>Historial: Registra movimiento "Recepción de transferencia"
+    end
+```
+
 ## 📁 Estructura del Proyecto
+
 
 * **`Isra.Demos.Microservicios.WebApi`**: Punto de entrada y gestión de Comandos.
 * **`Isra.Demos.Microservicios.CuentaMovimientos`**: Gestión del flujo de movimientos bancarios **(Depósitos, Retiros e Inicio de Transferencias)** mediante Event Sourcing. Emite el evento inicial de la Saga.

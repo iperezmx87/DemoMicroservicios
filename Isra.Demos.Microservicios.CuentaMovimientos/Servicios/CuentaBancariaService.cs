@@ -41,9 +41,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
 
             var cuenta = await ObtenerCuentaAsync(cuentaId);
 
-            if (cuenta.Version == 0)
-                throw new InvalidDataException("La cuenta no ha sido inicializada.");
-
             cuenta.Depositar(monto);
 
             // Guardar los eventos generados
