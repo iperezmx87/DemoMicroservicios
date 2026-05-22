@@ -1,4 +1,5 @@
 
+using Isra.Demos.Microservicios.CuentaMovimientos.Consultas;
 using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
 
@@ -10,15 +11,19 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
     public class CuentaBancariaService : ICuentaBancariaService
     {
         private readonly IRepositorioEventos _repositorioEventos;
+        private readonly ObtenerCuentaPorIdConsulta _obtenerCuentaPorIdConsulta;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="eventRepository"></param>
+        /// <param name="obtenerCuentaPorIdConsulta"></param>
         public CuentaBancariaService(
-            IRepositorioEventos eventRepository)
+            IRepositorioEventos eventRepository,
+            ObtenerCuentaPorIdConsulta obtenerCuentaPorIdConsulta)
         {
             _repositorioEventos = eventRepository;
+            _obtenerCuentaPorIdConsulta = obtenerCuentaPorIdConsulta;
         }
 
         /// <summary>
@@ -29,7 +34,16 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
         /// <returns></returns>
         public async Task DepositarAsync(Guid cuentaId, decimal monto)
         {
+            var cuentaConsulta = await _obtenerCuentaPorIdConsulta.EjecutarAsync(cuentaId);
+
+            if (cuentaConsulta == null)
+                throw new InvalidDataException("El número de cuenta no existe o no está activa.");
+
             var cuenta = await ObtenerCuentaAsync(cuentaId);
+
+            if (cuenta.Version == 0)
+                throw new InvalidDataException("La cuenta no ha sido inicializada.");
+
             cuenta.Depositar(monto);
 
             // Guardar los eventos generados
@@ -50,7 +64,16 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
         /// <returns></returns>
         public async Task RetirarAsync(Guid cuentaId, decimal monto)
         {
+            var cuentaConsulta = await _obtenerCuentaPorIdConsulta.EjecutarAsync(cuentaId);
+
+            if (cuentaConsulta == null)
+                throw new InvalidDataException("El número de cuenta no existe o no está activa.");
+
             var cuenta = await ObtenerCuentaAsync(cuentaId);
+
+            if (cuenta.Version == 0)
+                throw new InvalidDataException("La cuenta no ha sido inicializada.");
+
             cuenta.Retirar(monto);
 
             // Guardar los eventos generados
@@ -63,25 +86,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
         }
 
         /// <summary>
-        /// Obtiene la info de la cuenta
-        /// </summary>
-        /// <param name="cuentaId"></param>
-        /// <returns></returns>
-        public async Task<CuentaBancaria> ObtenerCuentaAsync(Guid cuentaId)
-        {
-            var cuenta = new CuentaBancaria(cuentaId, this);
-
-            var eventos = await _repositorioEventos.ObtenerEventosPorAgregadoAsync(cuentaId);
-
-            if (eventos.Any())
-            {
-                cuenta.ReconstructirDesdeEventos(eventos);
-            }
-
-            return cuenta;
-        }
-
-        /// <summary>
         /// Transfiere dinero de una cuenta a otra
         /// Se efectúa solamente el evento del dinero enviado, es otro servicio quien recibe el evento y procesa el deposito
         /// </summary>
@@ -91,10 +95,15 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
         /// <returns></returns>
         public async Task TransferirAsync(Guid cuentaOrigenId, Guid cuentaDestinoId, decimal monto)
         {
+            var cuentaConsulta = await _obtenerCuentaPorIdConsulta.EjecutarAsync(cuentaOrigenId);
+
+            if (cuentaConsulta == null)
+                throw new InvalidDataException("El número de cuenta origen no existe o no está activa.");
+
             var cuentaOrigen = await ObtenerCuentaAsync(cuentaOrigenId);
 
             if (cuentaOrigen.Version == 0)
-                throw new ArgumentException("La cuenta de origen no existe o no ha sido inicializada.");
+                throw new InvalidDataException("La cuenta de origen no ha sido inicializada.");
 
             await cuentaOrigen.TransferirDineroACuentaAsync(cuentaDestinoId, monto);
 
@@ -103,6 +112,25 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
                 await _repositorioEventos.GuardarEventoAsync(evento);
             }
             cuentaOrigen.LimpiarEventos();
+        }
+
+        /// <summary>
+        /// Obtiene la info de la cuenta
+        /// </summary>
+        /// <param name="cuentaId"></param>
+        /// <returns></returns>
+        public async Task<CuentaBancaria> ObtenerCuentaAsync(Guid cuentaId)
+        {
+            var cuenta = new CuentaBancaria(cuentaId);
+
+            var eventos = await _repositorioEventos.ObtenerEventosPorAgregadoAsync(cuentaId);
+
+            if (eventos.Any())
+            {
+                cuenta.ReconstructirDesdeEventos(eventos);
+            }
+
+            return cuenta;
         }
     }
 }

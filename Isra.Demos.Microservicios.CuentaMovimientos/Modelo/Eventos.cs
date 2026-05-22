@@ -164,6 +164,11 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         public Guid CuentaOrigenId { get; set; }
 
         /// <summary>
+        /// Motivo por el cual se devuelve el dinero
+        /// </summary>
+        public string MotivoDevolucion { get; set; }
+
+        /// <summary>
         /// constructor para inicializar el evento con los datos necesarios. Este constructor es esencial para garantizar que el evento se cree con toda la información relevante desde el momento de su instanciación, lo que facilita su uso en el proceso de manejo de errores durante las transferencias. Al proporcionar un constructor que acepta los parámetros necesarios, se asegura que el evento se construya de manera consistente y que todos los datos importantes estén disponibles para su procesamiento posterior en el sistema, permitiendo así una gestión efectiva de las transferencias fallidas y la restauración del estado original de las cuentas involucradas.
         /// </summary>
         /// <param name="id">Id cuenta receptora de la transferencia</param>

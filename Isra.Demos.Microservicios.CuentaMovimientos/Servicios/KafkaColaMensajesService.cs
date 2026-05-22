@@ -55,20 +55,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
         }
 
         /// <summary>
-        /// Publica el mensaje de envio de transferencia en la cola
-        /// </summary>
-        /// <param name="evento"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public async Task<Tuple<string, string>> PublicarTransferenciaDevueltaEventoAsync(
-            TransferenciaDevueltaEvento evento)
-        {
-            var mensaje = JsonSerializer.Serialize(evento);
-
-            return await PublicarEventoAsync(evento.EventId.ToString(), mensaje);
-        }
-
-        /// <summary>
         /// Publica el mensaje de devolución de transferencia en la cola
         /// </summary>
         /// <param name="evento"></param>

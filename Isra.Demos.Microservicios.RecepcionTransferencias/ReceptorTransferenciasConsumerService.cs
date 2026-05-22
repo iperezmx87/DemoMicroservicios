@@ -68,9 +68,27 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
                             case "TransferenciaRealizadaEvento":
                                 var recepcionTransferencia = JsonSerializer.Deserialize<TransferenciaRecibidaEvento>(eventoJson);
 
-                                await _cuentaBancariaService.RecibirTransferenciaAsync(recepcionTransferencia.CuentaDestinoId, recepcionTransferencia.Monto);
+                                try
+                                {
+                                    await _cuentaBancariaService.RecibirTransferenciaAsync(recepcionTransferencia.CuentaDestinoId, recepcionTransferencia.Monto);
 
-                                Console.WriteLine($"Recepción de transferencia: {recepcionTransferencia.AggregateId} {recepcionTransferencia.Monto}");
+                                    Console.WriteLine($"Recepción de transferencia: {recepcionTransferencia.AggregateId} {recepcionTransferencia.Monto}");
+                                }
+                                catch (InvalidDataException ex)
+                                {
+                                    // errores en la validación de la cuenta receptora o del monto
+                                    // se tiene que efectuar la devolución del dinero al emisor, para lo cual se puede publicar un nuevo evento de devolución de transferencia
+                                    Console.WriteLine("Error al procesar la recepción de transferencia: {0}. Devolviendo el dinero", ex.Message);
+
+                                    await _cuentaBancariaService.DevolverTransferenciaAsync(
+                                       recepcionTransferencia.EventId,
+                                       recepcionTransferencia.AggregateId,
+                                       ex.Message,
+                                       recepcionTransferencia.Monto
+                                       );
+
+                                    Console.WriteLine($"Devolución de transferencia: Origen {recepcionTransferencia.AggregateId}; Destino {recepcionTransferencia.CuentaDestinoId} {recepcionTransferencia.Monto}");
+                                }
 
                                 break;
 
@@ -82,11 +100,6 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
                     {
                         // El servicio se está deteniendo, salir del bucle
                         break;
-                    }
-                    catch (Exception ex)
-                    {
-                        // Manejar otras excepciones según sea necesario
-                        Console.WriteLine($"Error al consumir mensaje: {ex.Message}");
                     }
                 }
             }, stoppingToken);

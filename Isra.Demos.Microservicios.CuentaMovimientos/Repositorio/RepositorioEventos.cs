@@ -54,7 +54,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
                     Processed = false
                 };
 
-
                 switch (evento.TipoEvento)
                 {
                     case "DineroDepositadoEvento":
@@ -66,11 +65,8 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
                     case "TransferenciaRealizadaEvento":
                         outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((TransferenciaRealizadaEvento)evento);
                         break;
-                    case "TransferenciaDevueltaEvento":
-                        outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((TransferenciaDevueltaEvento)evento);
-                        break;
                     default:
-                        throw new InvalidOperationException($"Tipo de evento no soportado: {evento.TipoEvento}");
+                        break;
                 }
 
                 await _collectionSalida.InsertOneAsync(outboxMessage);
@@ -80,7 +76,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
             catch (Exception)
             {
                 await session.AbortTransactionAsync();
-                throw;
             }
         }
 

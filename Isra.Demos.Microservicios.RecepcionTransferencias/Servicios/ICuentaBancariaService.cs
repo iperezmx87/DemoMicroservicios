@@ -22,5 +22,19 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
         /// <param name="monto"></param>
         /// <returns></returns>
         Task RecibirTransferenciaAsync(Guid cuentaDestinoId, decimal monto);
+
+        /// <summary>
+        /// Efectúa la devolución de una transferencia, generando un evento de devolución que indica que la transferencia ha sido devuelta al remitente. Este proceso es fundamental para garantizar la integridad de las transacciones y para proporcionar una experiencia de usuario transparente en caso de problemas con las transferencias. Al generar el evento de devolución, se actualiza el estado de la cuenta bancaria y se notifica al usuario sobre la devolución de la transferencia, lo que permite tomar las medidas necesarias para resolver cualquier problema relacionado con la transferencia original.
+        /// </summary>
+        /// <param name="idTransferenciaOrigen"></param>
+        /// <param name="cuentaOrigenId"></param>
+        /// <param name="motivoDevolucion"></param>
+        /// <param name="monto"></param>
+        /// <returns></returns>
+        Task DevolverTransferenciaAsync(
+            Guid idTransferenciaOrigen,
+            Guid cuentaOrigenId,
+            string motivoDevolucion,
+            decimal monto);
     }
 }

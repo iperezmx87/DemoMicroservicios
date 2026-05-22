@@ -1,5 +1,6 @@
 using Isra.Demos.Microservicios.CuentaMovimientos;
 using Isra.Demos.Microservicios.CuentaMovimientos.Configuracion;
+using Isra.Demos.Microservicios.CuentaMovimientos.Consultas;
 using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
 using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -62,6 +63,7 @@ builder.Services.AddSingleton(mongoDatabase);
 builder.Services.AddScoped<IRepositorioEventos, RepositorioEventos>();
 builder.Services.AddSingleton<IColaMensajesService, KafkaColaMensajesService>();
 builder.Services.AddScoped<ICuentaBancariaService, CuentaBancariaService>();
+builder.Services.AddScoped<ObtenerCuentaPorIdConsulta>();
 
 // agregar servicio background para procesar los mensajes de salida
 builder.Services.AddHostedService<ProcesadorMensajesSalidaService>();

@@ -1,6 +1,5 @@
 ﻿using Confluent.Kafka;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
 using System.Text.Json;
 
 namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
@@ -30,13 +29,12 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
         }
 
         /// <summary>
-        /// Publica el mensaje de envio de transferencia en la cola
+        /// Publica el mensaje de devolución de transferencia en la cola
         /// </summary>
         /// <param name="evento"></param>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
-        public async Task<Tuple<string, string>> PublicarTransferenciaDevueltaEventoAsync(
-            TransferenciaDevueltaEvento evento)
+        public async Task<Tuple<string, string>> PublicarTransferenciaRecibidaEventoAsync(
+            TransferenciaRecibidaEvento evento)
         {
             var mensaje = JsonSerializer.Serialize(evento);
 
@@ -44,12 +42,13 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
         }
 
         /// <summary>
-        /// Publica el mensaje de devolución de transferencia en la cola
+        /// Publica el mensaje de envio de transferencia en la cola
         /// </summary>
         /// <param name="evento"></param>
         /// <returns></returns>
-        public async Task<Tuple<string, string>> PublicarTransferenciaRecibidaEventoAsync(
-            TransferenciaRecibidaEvento evento)
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<Tuple<string, string>> PublicarTransferenciaDevueltaEventoAsync(
+            TransferenciaDevueltaEvento evento)
         {
             var mensaje = JsonSerializer.Serialize(evento);
 

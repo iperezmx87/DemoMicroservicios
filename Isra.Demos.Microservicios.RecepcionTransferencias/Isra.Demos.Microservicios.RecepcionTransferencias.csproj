@@ -9,6 +9,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.1.72" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.4" />
 		<PackageReference Include="Confluent.Kafka" Version="2.14.0" />
 		<PackageReference Include="MongoDB.Driver" Version="3.1.0" />

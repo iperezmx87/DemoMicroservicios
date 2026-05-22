@@ -45,9 +45,9 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
-            catch (Exception ex)
+            catch (InvalidDataException ide)
             {
-                return StatusCode(500, new { error = ex.Message });
+                return BadRequest(new { mensaje = ide.Message });
             }
         }
 
@@ -72,13 +72,9 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidDataException ide)
             {
-                return BadRequest(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
+                return BadRequest(new { mensaje = ide.Message });
             }
         }
 
@@ -110,13 +106,9 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
             {
                 return BadRequest(new { error = ex.Message });
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidDataException ide)
             {
-                return BadRequest(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
+                return BadRequest(new { mensaje = ide.Message });
             }
         }
     }

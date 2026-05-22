@@ -158,6 +158,11 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
         public Guid IdTransferenciaOrigen { get; set; }
 
         /// <summary>
+        /// Motivo por el cual se devuelve el dinero
+        /// </summary>
+        public string MotivoDevolucion { get; set; }
+
+        /// <summary>
         /// cuenta de donde salio la transferencia original
         /// </summary>
         [BsonGuidRepresentation(GuidRepresentation.Standard)]
@@ -171,13 +176,19 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
         /// <param name="monto">Monto a devolver</param>
         /// <param name="cuentaOrigenId">Id de la cuenta de origen</param>
         /// <param name="version">Versión del evento</param>
-        public TransferenciaDevueltaEvento(Guid id, Guid idTransferenciaOrigen, decimal monto, Guid cuentaOrigenId, int version)
+        /// <param name="motivoDevolucion">Motivo por el cual se devuelve el dinero</param>
+        public TransferenciaDevueltaEvento(Guid id, 
+            Guid idTransferenciaOrigen, decimal monto, 
+            Guid cuentaOrigenId, int version,
+            string motivoDevolucion)
         {
+            // aggregate id es la cuenta destino
             AggregateId = id;
             IdTransferenciaOrigen = idTransferenciaOrigen;
             Monto = monto;
             CuentaOrigenId = cuentaOrigenId;
             Version = version;
+            MotivoDevolucion = motivoDevolucion;
         }
 
         /// <summary>

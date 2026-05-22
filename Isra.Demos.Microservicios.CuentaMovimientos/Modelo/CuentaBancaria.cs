@@ -1,4 +1,3 @@
-using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -9,8 +8,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
     /// </summary>
     public class CuentaBancaria
     {
-        private readonly ICuentaBancariaService _cuentaBancariaService;
-
         /// <summary>
         /// Id de la cuenta bancaria, se utiliza como AggregateId para los eventos relacionados con esta cuenta. Este identificador es fundamental para el patrón de Event Sourcing, ya que permite asociar todos los eventos que afectan a esta cuenta específica. Al utilizar un Guid como identificador, se garantiza la unicidad de cada cuenta bancaria en el sistema, lo que facilita la gestión y recuperación de eventos relacionados con esta cuenta en particular. Además, este Id es esencial para reconstruir el estado de la cuenta a partir de los eventos almacenados en el repositorio de eventos.
         /// </summary>
@@ -36,13 +33,11 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         /// Constructor para crear una nueva cuenta bancaria con un Id específico. Este constructor es esencial para inicializar una cuenta bancaria con un identificador único, lo que permite asociar los eventos relacionados con esta cuenta de manera consistente. Al establecer el saldo inicial en 0 y la versión en 0, se garantiza que la cuenta comience con un estado limpio, listo para recibir eventos de depósito y retiro que modificarán su estado a lo largo del tiempo. Además, este constructor facilita la creación de cuentas bancarias a partir de eventos históricos, permitiendo reconstruir el estado de la cuenta a partir de los eventos almacenados en el repositorio de eventos.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="cuentaBancariaService"></param>
-        public CuentaBancaria(Guid id, ICuentaBancariaService cuentaBancariaService)
+        public CuentaBancaria(Guid id)
         {
             Id = id;
             Saldo = 0;
             Version = 0;
-            _cuentaBancariaService = cuentaBancariaService;
         }
 
         /// <summary>
@@ -61,7 +56,7 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         public void Depositar(decimal monto)
         {
             if (monto <= 0)
-                throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
+                throw new InvalidDataException("El monto debe ser mayor a 0");
 
             var evento = new DineroDepositadoEvento(
                 Id, monto, Version + 1);
@@ -77,10 +72,10 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         public void Retirar(decimal monto)
         {
             if (monto <= 0)
-                throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
+                throw new InvalidDataException("El monto debe ser mayor a 0");
 
             if (Saldo < monto)
-                throw new InvalidOperationException("Saldo insuficiente");
+                throw new InvalidDataException("La cuenta tiene saldo insuficiente");
 
             var evento = new DineroRetiradoEvento(
                 Id, monto, Version + 1);
@@ -97,17 +92,11 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         /// <param name="idCuentaDestino"></param>
         public async Task TransferirDineroACuentaAsync(Guid idCuentaDestino, decimal monto)
         {
-            // buscar la cuenta destino
-            var cuentaDestino = await _cuentaBancariaService.ObtenerCuentaAsync(idCuentaDestino);
-
-            if (cuentaDestino == null)
-                throw new ArgumentException("La cuenta destino no existe", nameof(idCuentaDestino));
-
             if (monto <= 0)
-                throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
+                throw new InvalidDataException("El monto debe ser mayor a 0");
 
             if (Saldo < monto)
-                throw new InvalidOperationException("Saldo insuficiente");
+                throw new InvalidDataException("La cuenta tiene saldo insuficiente");
 
             var evento = new TransferenciaRealizadaEvento(
                 Id, monto, idCuentaDestino, Version + 1);

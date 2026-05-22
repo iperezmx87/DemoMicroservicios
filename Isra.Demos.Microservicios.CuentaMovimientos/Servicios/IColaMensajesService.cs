@@ -30,14 +30,5 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
         /// <returns></returns>
         Task<Tuple<string, string>> PublicarTransferenciaRealizadaEventoAsync(
             TransferenciaRealizadaEvento evento);
-
-
-        /// <summary>
-        /// Publica el evento en la cola de mensajes para envio de transferencia devuelta por error
-        /// </summary>
-        /// <param name="evento"></param>
-        /// <returns></returns>
-        Task<Tuple<string, string>> PublicarTransferenciaDevueltaEventoAsync(
-            TransferenciaDevueltaEvento evento);
     }
 }

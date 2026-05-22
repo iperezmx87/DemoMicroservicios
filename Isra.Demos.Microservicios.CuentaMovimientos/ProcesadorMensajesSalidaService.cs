@@ -65,11 +65,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos
                                     JsonSerializer.Deserialize<DineroRetiradoEvento>(msg.Payload));
                             break;
 
-                        case "TransferenciaDevueltaEvento":
-                            tplResultPublicar = await _colaMensajesService.PublicarTransferenciaDevueltaEventoAsync(
-                                JsonSerializer.Deserialize<TransferenciaDevueltaEvento>(msg.Payload));
-                            break;
-
                         case "TransferenciaRealizadaEvento":
                             tplResultPublicar = await _colaMensajesService.PublicarTransferenciaRealizadaEventoAsync(
                                 JsonSerializer.Deserialize<TransferenciaRealizadaEvento>(msg.Payload));
@@ -77,7 +72,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos
 
                         default:
                             break;
-                            // throw new InvalidOperationException("Tipo de evento desconocido en el mensaje de salida.");
                     }
 
                     if (tplResultPublicar.Item2 == nameof(PersistenceStatus.Persisted))

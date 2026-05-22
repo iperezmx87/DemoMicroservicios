@@ -59,6 +59,11 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
                                 JsonSerializer.Deserialize<TransferenciaRecibidaEvento>(msg.Payload));
                             break;
 
+                        case "TransferenciaDevueltaEvento":
+                            tplResultPublicar = await _colaMensajesService.PublicarTransferenciaDevueltaEventoAsync(
+                                JsonSerializer.Deserialize<TransferenciaDevueltaEvento>(msg.Payload));
+                            break;
+
                         default:
                             break;
                     }
@@ -72,7 +77,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
                     }
                 }
 
-                await Task.Delay(10000); // Esperar diez segundos antes de la siguiente vuelta
+                await Task.Delay(10000);
             }
         }
     }

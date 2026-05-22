@@ -1,3 +1,4 @@
+using Isra.Demos.Microservicios.RecepcionTransferencias.Consultas;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -9,7 +10,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
     /// </summary>
     public class CuentaBancaria
     {
-        private readonly ICuentaBancariaService _cuentaBancariaService;
+        private readonly ObtenerCuentaPorIdConsulta _obtenerCuentaPorIdConsulta;
 
         /// <summary>
         /// Id de la cuenta bancaria, se utiliza como AggregateId para los eventos relacionados con esta cuenta. Este identificador es fundamental para el patrón de Event Sourcing, ya que permite asociar todos los eventos que afectan a esta cuenta específica. Al utilizar un Guid como identificador, se garantiza la unicidad de cada cuenta bancaria en el sistema, lo que facilita la gestión y recuperación de eventos relacionados con esta cuenta en particular. Además, este Id es esencial para reconstruir el estado de la cuenta a partir de los eventos almacenados en el repositorio de eventos.
@@ -36,13 +37,11 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
         /// Constructor para crear una nueva cuenta bancaria con un Id específico. Este constructor es esencial para inicializar una cuenta bancaria con un identificador único, lo que permite asociar los eventos relacionados con esta cuenta de manera consistente. Al establecer el saldo inicial en 0 y la versión en 0, se garantiza que la cuenta comience con un estado limpio, listo para recibir eventos de depósito y retiro que modificarán su estado a lo largo del tiempo. Además, este constructor facilita la creación de cuentas bancarias a partir de eventos históricos, permitiendo reconstruir el estado de la cuenta a partir de los eventos almacenados en el repositorio de eventos.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="cuentaBancariaService"></param>
-        public CuentaBancaria(Guid id, ICuentaBancariaService cuentaBancariaService)
+        public CuentaBancaria(Guid id)
         {
             Id = id;
             Saldo = 0;
             Version = 0;
-            _cuentaBancariaService = cuentaBancariaService;
         }
 
         /// <summary>
@@ -64,16 +63,38 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
         /// <exception cref="ArgumentException"></exception>
         public async Task RecibirTransferenciaAsync(Guid idCuentaDestino, decimal monto)
         {
-            var cuentaDestino = await _cuentaBancariaService.ObtenerCuentaAsync(idCuentaDestino);
-
-            if (cuentaDestino == null)
-                throw new ArgumentException("La cuenta destino no existe", nameof(idCuentaDestino));
-
             if (monto <= 0)
-                throw new ArgumentException("El monto debe ser mayor a 0", nameof(monto));
+                throw new InvalidDataException("El monto debe ser mayor a 0");
 
             // validar si la cuenta es correcta
             var evento = new TransferenciaRecibidaEvento(idCuentaDestino, monto, Version + 1);
+
+            AplicarEvento(evento);
+
+            _eventos.Add(evento);
+        }
+
+        /// <summary>
+        /// Genera el evento de devolución de transferencia, este evento se genera cuando se detecta que una transferencia realizada no ha sido recibida por la cuenta destino en un tiempo determinado. Al generar este evento, se indica que la transferencia ha sido devuelta al remitente, lo que permite actualizar el estado de la cuenta bancaria y notificar al usuario sobre la devolución de la transferencia. Este proceso es fundamental para garantizar la integridad de las transacciones y para proporcionar una experiencia de usuario transparente en caso de problemas con las transferencias.
+        /// </summary>
+        /// <param name="idTransferenciaOrigen"></param>
+        /// <param name="idCuentaOrigen"></param>
+        /// <param name="motivoDevolucion"></param>
+        /// <param name="monto"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidDataException"></exception>
+        public async Task DevolverDineroTransferenciaAsync(
+            Guid idTransferenciaOrigen,
+            Guid idCuentaOrigen,
+            string motivoDevolucion,
+            decimal monto)
+        {
+            if (monto <= 0)
+                throw new InvalidDataException("El monto debe ser mayor a 0");
+
+            var evento = new TransferenciaDevueltaEvento(
+                Id, idTransferenciaOrigen, monto,
+                idCuentaOrigen, Version + 1, motivoDevolucion);
 
             AplicarEvento(evento);
 
