@@ -1,3 +1,13 @@
+# Algunas estadísticas
+
+## Pulls de microservicios
+### Portal react
+![Docker Pulls](https://img.shields.io/docker/pulls/pesimx87/banco-react?style=for-the-badge&color=blue&logo=docker)
+
+## Pulls de microservicios
+### Servicio cuentas movimientos
+![Docker Pulls](https://img.shields.io/docker/pulls/pesimx87/isra-microservicios-cuenta-movimientos?style=for-the-badge&color=blue&logo=docker)
+
 ![Docker Pulls](https://img.shields.io/docker/pulls/pesimx87/banco-react?style=for-the-badge&color=blue&logo=docker)
 
 ![Vistas](https://komarev.com/ghpvc/?username=iperezmx87&repo=DemoMicroservicios&style=for-the-badge&color=green)
