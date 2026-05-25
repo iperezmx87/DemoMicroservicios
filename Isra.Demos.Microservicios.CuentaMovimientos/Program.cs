@@ -57,7 +57,7 @@ var mongoClient = new MongoClient(mongoConnectionString);
 var mongoDatabase = mongoClient.GetDatabase(builder.Configuration.GetValue("MongoDB:DatabaseName", "bd_cuentas_movimientos"));
 
 // Registrar servicios y repositorios
-builder.Services.AddSingleton<IMongoClient, MongoClient>();
+builder.Services.AddSingleton<IMongoClient>(mongoClient);
 builder.Services.AddSingleton(mongoDatabase);
 
 builder.Services.AddScoped<IRepositorioEventos, RepositorioEventos>();
