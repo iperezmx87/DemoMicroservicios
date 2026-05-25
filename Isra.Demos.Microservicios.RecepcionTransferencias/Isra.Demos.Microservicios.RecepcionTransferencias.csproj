@@ -20,7 +20,7 @@
 	<PropertyGroup>
 		<RootNamespace>Isra.Demos.Microservicios.RecepcionTransferencias</RootNamespace>
 		<ContainerRepository>pesimx87/isra-microservicios-recepcion-transferencias</ContainerRepository>
-		<ContainerImageTag>1.0.0</ContainerImageTag>
+		<ContainerImageTag>1.0.1</ContainerImageTag>
 		<ContainerRegistry>docker.io</ContainerRegistry>
 		<ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0</ContainerBaseImage>
 		<ContainerPort>8075</ContainerPort>

@@ -1,3 +1,24 @@
+# Algunas estadísticas
+
+## Pulls de microservicios
+### Portal react
+![Docker Pulls](https://img.shields.io/docker/pulls/pesimx87/banco-react?style=for-the-badge&color=blue&logo=docker)
+
+### Servicio cuentas movimientos
+![Docker Pulls](https://img.shields.io/docker/pulls/pesimx87/isra-microservicios-cuenta-movimientos?style=for-the-badge&color=blue&logo=docker)
+
+### Servicio recepción transferencias
+![Docker Pulls](https://img.shields.io/docker/pulls/pesimx87/isra-microservicios-recepcion-transferencias?style=for-the-badge&color=blue&logo=docker)
+
+### Servicio saldo
+![Docker Pulls](https://img.shields.io/docker/pulls/pesimx87/isra-microservicios-saldo?style=for-the-badge&color=blue&logo=docker)
+
+### Servicio estado de cuenta
+![Docker Pulls](https://img.shields.io/docker/pulls/pesimx87/isra-microservicios-estado-cuenta?style=for-the-badge&color=blue&logo=docker)
+
+### Vistas del perfil de github
+![Vistas](https://komarev.com/ghpvc/?username=iperezmx87&repo=DemoMicroservicios&style=for-the-badge&color=green)
+
 # 🏦 Demo de Microservicios Bancarios - Event Sourcing & CQRS
 
 Este repositorio es una demostración técnica de una arquitectura distribuida de alto rendimiento para la gestión de operaciones bancarias. El proyecto implementa un ecosistema de microservicios utilizando **.NET 10**, enfocado en la trazabilidad absoluta, la inmutabilidad de los datos y la resiliencia del sistema.

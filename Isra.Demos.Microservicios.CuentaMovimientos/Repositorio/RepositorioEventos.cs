@@ -43,7 +43,7 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
             try
             {
                 // almacena el evento nuevo
-                await _collection.InsertOneAsync(evento);
+                await _collection.InsertOneAsync(session, evento);
 
                 // guarda la tabla outbox
                 var outboxMessage = new MensajeSalida
@@ -69,7 +69,7 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
                         break;
                 }
 
-                await _collectionSalida.InsertOneAsync(outboxMessage);
+                await _collectionSalida.InsertOneAsync(session, outboxMessage);
 
                 await session.CommitTransactionAsync();
             }
