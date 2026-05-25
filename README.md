@@ -1,3 +1,7 @@
+![Docker Pulls](https://img.shields.io/docker/pulls/tu_usuario_docker/tu_repositorio?style=for-the-badge&color=blue&logo=docker)
+
+![Vistas](https://komarev.com/ghpvc/?username=iperezmx87&repo=DemoMicroservicios&style=for-the-badge&color=green)
+
 # 🏦 Demo de Microservicios Bancarios - Event Sourcing & CQRS
 
 Este repositorio es una demostración técnica de una arquitectura distribuida de alto rendimiento para la gestión de operaciones bancarias. El proyecto implementa un ecosistema de microservicios utilizando **.NET 10**, enfocado en la trazabilidad absoluta, la inmutabilidad de los datos y la resiliencia del sistema.
