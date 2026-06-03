@@ -24,6 +24,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
             AggregateId = id;
             Monto = monto;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -55,6 +56,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
             AggregateId = id;
             Monto = monto;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -94,6 +96,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
             Monto = monto;
             CuentaDestinoId = cuentaDestinoId;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -131,6 +134,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
             AggregateId = id;
             Monto = monto;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -189,6 +193,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
             CuentaOrigenId = cuentaOrigenId;
             Version = version;
             MotivoDevolucion = motivoDevolucion;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
