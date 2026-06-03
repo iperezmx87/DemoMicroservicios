@@ -29,6 +29,7 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
             AggregateId = id;
             Monto = monto;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -65,6 +66,7 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
             AggregateId = id;
             Monto = monto;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -108,6 +110,7 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
             Monto = monto;
             CuentaDestinoId = cuentaDestinoId;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -150,6 +153,7 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
             AggregateId = id;
             Monto = monto;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -202,6 +206,7 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
             Monto = monto;
             CuentaOrigenId = cuentaOrigenId;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>

@@ -28,6 +28,6 @@
         /// <summary>
         /// Tipo de evento, se obtiene del nombre de la clase que hereda de EventoBase
         /// </summary>
-        public string TipoEvento => GetType().Name;
+        public string TipoEvento { get; set; }
     }
 }

@@ -21,6 +21,7 @@
             AggregateId = id;
             Monto = monto;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -52,6 +53,7 @@
             AggregateId = id;
             Monto = monto;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -90,6 +92,7 @@
             Monto = monto;
             CuentaDestinoId = cuentaDestinoId;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -126,6 +129,7 @@
             AggregateId = id;
             Monto = monto;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
@@ -171,6 +175,7 @@
             Monto = monto;
             CuentaOrigenId = cuentaOrigenId;
             Version = version;
+            TipoEvento = GetType().Name;
         }
 
         /// <summary>
