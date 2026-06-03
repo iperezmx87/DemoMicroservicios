@@ -5,22 +5,13 @@ using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
 using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuración de CORS para permitir al frontend conectarse
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowFrontend", policy =>
-//    {
-//        policy.WithOrigins("http://localhost:5173", "http://localhost:4200", "http://localhost:5116")
-//              .AllowAnyHeader()
-//              .AllowAnyMethod()
-//              .AllowCredentials();
-//    });
-//});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -55,6 +46,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+// Configuración de MongoDB para ignorar campos adicionales que no estén mapeados en las clases de eventos. Esto es útil para evitar errores de deserialización si se agregan nuevos campos a los eventos en el futuro.
+var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
+ConventionRegistry.Register("IgnoreExtraElements", conventionPack, type => true);
 
 // Registrar mapeos de MongoDB
 MongoDbConfig.RegistrarMapeos();
