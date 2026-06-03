@@ -7,16 +7,6 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuración de CORS para permitir al frontend conectarse
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowFrontend", policy =>
-//    {
-//        policy.WithOrigins("http://localhost:5173", "http://localhost:4200", "http://localhost:5116")
-//              .AllowAnyHeader()
-//              .AllowAnyMethod()
-//              .AllowCredentials();
-//    });
-//});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -30,7 +20,6 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 builder.Services.AddScoped<ICuentaServicio, CuentaServicio>();
 builder.Services.AddScoped<ICuentaRepositorio, CuentaRepositorio>();
-
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

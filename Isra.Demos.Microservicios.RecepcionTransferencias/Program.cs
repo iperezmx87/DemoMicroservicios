@@ -3,10 +3,13 @@ using Isra.Demos.Microservicios.RecepcionTransferencias.Configuracion;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Consultas;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
-
 var builder = Host.CreateApplicationBuilder(args);
+
+var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
+ConventionRegistry.Register("IgnoreExtraElements", conventionPack, type => true);
 
 // Registrar mapeos de MongoDB
 MongoDbConfig.RegistrarMapeos();
