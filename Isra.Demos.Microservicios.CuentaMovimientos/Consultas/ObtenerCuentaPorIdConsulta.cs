@@ -1,6 +1,7 @@
-﻿using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
+﻿using Dapper;
+using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 using Microsoft.Data.SqlClient;
-using Dapper;
+using Polly;
 
 namespace Isra.Demos.Microservicios.CuentaMovimientos.Consultas
 {
@@ -10,14 +11,19 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Consultas
     public class ObtenerCuentaPorIdConsulta
     {
         private readonly string _connectionString;
+        private readonly ResiliencePipeline _resiliencePipeline;
 
         /// <summary>
         /// Constructor que recibe la configuración para obtener la cadena de conexión a la base de datos SQL Server.
         /// </summary>
         /// <param name="configuration"></param>
-        public ObtenerCuentaPorIdConsulta(IConfiguration configuration)
+        /// <param name="resiliencePipeline"></param>
+        public ObtenerCuentaPorIdConsulta(
+            IConfiguration configuration,
+            ResiliencePipeline resiliencePipeline)
         {
             _connectionString = configuration.GetConnectionString("SqlServerBancoCuentasConnectionString");
+            _resiliencePipeline = resiliencePipeline;
         }
 
         /// <summary>
@@ -27,14 +33,17 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Consultas
         /// <returns></returns>
         public async Task<CuentaBancaria> EjecutarAsync(Guid idCuenta)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            return await _resiliencePipeline.ExecuteAsync(async token =>
             {
-                var query = "SELECT IdCuenta Id FROM TblCuentasUsuario WHERE IdCuenta = @Id and Estatus = 1";
-                return await connection.QueryFirstOrDefaultAsync<CuentaBancaria>(
-                    query,
-                     new { Id = idCuenta }
-                );
-            }
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    var query = "SELECT IdCuenta Id FROM TblCuentasUsuario WHERE IdCuenta = @Id and Estatus = 1";
+                    return await connection.QueryFirstOrDefaultAsync<CuentaBancaria>(
+                        query,
+                         new { Id = idCuenta }
+                    );
+                }
+            });
         }
     }
 }

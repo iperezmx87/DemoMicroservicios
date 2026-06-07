@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Isra.Demos.Microservicios.WebApi.Contratos;
 using Npgsql;
+using Polly;
 
 namespace Isra.Demos.Microservicios.WebApi.Repositorio
 {
@@ -11,14 +12,19 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
     {
         private readonly string _connectionString;
         private readonly IConfiguration _configuration;
+        private readonly ResiliencePipeline _resiliencePipeline;
 
         /// <summary>
-        /// Constructor que inicializa la cadena de conexión a la base de datos PostgreSQL utilizando una constante definida en el proyecto.
+        /// Constructor
         /// </summary>
-        public SaldoRepositorio(IConfiguration configuration)
+        /// <param name="configuration"></param>
+        /// <param name="resiliencePipeline"></param>
+        public SaldoRepositorio(IConfiguration configuration,
+            ResiliencePipeline resiliencePipeline)
         {
             _configuration = configuration;
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:PostgresSaldoConnection");
+            _resiliencePipeline = resiliencePipeline;
         }
 
         /// <summary>
@@ -28,14 +34,17 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
         /// <returns></returns>
         public async Task<decimal> GetSaldoActualAsync(Guid cuentaId)
         {
-            using (var connection = new NpgsqlConnection(_connectionString))
+            return await _resiliencePipeline.ExecuteAsync(async token =>
             {
-                await connection.OpenAsync();
+                using (var connection = new NpgsqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
 
-                return await connection.QuerySingleAsync<decimal>(
-                    "SELECT saldo FROM cuentas.saldos_cuenta WHERE id = @cuentaId",
-                    new { cuentaId });
-            }
+                    return await connection.QuerySingleAsync<decimal>(
+                        "SELECT saldo FROM cuentas.saldos_cuenta WHERE id = @cuentaId",
+                        new { cuentaId });
+                }
+            });
         }
     }
 }
