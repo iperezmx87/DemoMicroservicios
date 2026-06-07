@@ -1,5 +1,6 @@
 using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 using MongoDB.Driver;
+using Polly;
 
 namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
 {
@@ -12,6 +13,7 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
         private readonly IMongoCollection<MensajeSalida> _collectionSalida;
         private readonly IMongoClient _client;
         private readonly IConfiguration _configuration;
+        private readonly ResiliencePipeline _resiliencePipeline;
 
         /// <summary>
         /// Repositorio de eventos en mongoDB. Este repositorio es responsable de almacenar y recuperar eventos que representan las acciones y cambios de estado en el sistema. Al implementar esta clase, se garantiza que los eventos se gestionen de manera consistente, permitiendo la reconstrucción del estado de los agregados a partir de los eventos almacenados. Además, este repositorio facilita la auditoría y el análisis de los eventos que han ocurrido en el sistema a lo largo del tiempo.
@@ -19,15 +21,18 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
         /// <param name="database"></param>
         /// <param name="client"></param>
         /// <param name="configuration"></param>
+        /// <param name="resiliencePipeline"></param>
         public RepositorioEventos(
             IMongoDatabase database,
             IMongoClient client,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ResiliencePipeline resiliencePipeline)
         {
             _configuration = configuration;
             _client = client;
             _collection = database.GetCollection<EventoBase>(_configuration.GetValue<string>("MongoDB:CuentasMovimientosCollectionName"));
             _collectionSalida = database.GetCollection<MensajeSalida>(_configuration.GetValue<string>("MongoDB:CuentasMovimientosOutboxCollectionName"));
+            _resiliencePipeline = resiliencePipeline;
         }
 
         /// <summary>
@@ -37,46 +42,49 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
         /// <returns></returns>
         public async Task GuardarEventoAsync(EventoBase evento)
         {
-            using var session = await _client.StartSessionAsync();
-            session.StartTransaction();
-
-            try
+            await _resiliencePipeline.ExecuteAsync(async token =>
             {
-                // almacena el evento nuevo
-                await _collection.InsertOneAsync(session, evento);
+                using var session = await _client.StartSessionAsync();
+                session.StartTransaction();
 
-                // guarda la tabla outbox
-                var outboxMessage = new MensajeSalida
+                try
                 {
-                    Topic = _configuration.GetValue<string>("Kafka:Topic"),
-                    Id = evento.EventId,
-                    OccurredOn = DateTime.UtcNow,
-                    Processed = false
-                };
+                    // almacena el evento nuevo
+                    await _collection.InsertOneAsync(session, evento);
 
-                switch (evento.TipoEvento)
-                {
-                    case "DineroDepositadoEvento":
-                        outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((DineroDepositadoEvento)evento);
-                        break;
-                    case "DineroRetiradoEvento":
-                        outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((DineroRetiradoEvento)evento);
-                        break;
-                    case "TransferenciaRealizadaEvento":
-                        outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((TransferenciaRealizadaEvento)evento);
-                        break;
-                    default:
-                        break;
+                    // guarda la tabla outbox
+                    var outboxMessage = new MensajeSalida
+                    {
+                        Topic = _configuration.GetValue<string>("Kafka:Topic"),
+                        Id = evento.EventId,
+                        OccurredOn = DateTime.UtcNow,
+                        Processed = false
+                    };
+
+                    switch (evento.TipoEvento)
+                    {
+                        case "DineroDepositadoEvento":
+                            outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((DineroDepositadoEvento)evento);
+                            break;
+                        case "DineroRetiradoEvento":
+                            outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((DineroRetiradoEvento)evento);
+                            break;
+                        case "TransferenciaRealizadaEvento":
+                            outboxMessage.Payload = System.Text.Json.JsonSerializer.Serialize((TransferenciaRealizadaEvento)evento);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    await _collectionSalida.InsertOneAsync(session, outboxMessage);
+
+                    await session.CommitTransactionAsync();
                 }
-
-                await _collectionSalida.InsertOneAsync(session, outboxMessage);
-
-                await session.CommitTransactionAsync();
-            }
-            catch (Exception)
-            {
-                await session.AbortTransactionAsync();
-            }
+                catch (Exception)
+                {
+                    await session.AbortTransactionAsync();
+                }
+            });
         }
 
         /// <summary>
@@ -86,13 +94,16 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
         /// <returns></returns>
         public async Task<IEnumerable<EventoBase>> ObtenerEventosPorAgregadoAsync(Guid agregadoId)
         {
-            var filter = Builders<EventoBase>.Filter
+            return await _resiliencePipeline.ExecuteAsync(async token =>
+            {
+                var filter = Builders<EventoBase>.Filter
                 .Eq(e => e.AggregateId, agregadoId);
 
-            return await _collection
-                .Find(filter)
-                .SortBy(e => e.Version)
-                .ToListAsync();
+                return await _collection
+                    .Find(filter)
+                    .SortBy(e => e.Version)
+                    .ToListAsync();
+            });
         }
     }
 }

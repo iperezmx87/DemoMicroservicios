@@ -2,6 +2,8 @@ using Confluent.Kafka;
 using Dapper;
 using Isra.Demos.Microservicios.Saldo.Modelo;
 using Npgsql;
+using Polly;
+using Polly.Retry;
 using System.Text.Json;
 
 namespace Isra.Demos.Microservicios.Saldo
@@ -11,9 +13,11 @@ namespace Isra.Demos.Microservicios.Saldo
     /// </summary>
     public class SaldoConsumerService : BackgroundService
     {
-        private readonly IConsumer<Ignore, string> _consumer;
+        private readonly IConsumer<string, string> _consumer;
+        private readonly IProducer<string, string> _producer;
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
+        private readonly ResiliencePipeline _resiliencePipeline;
 
         /// <summary>
         /// Constructor
@@ -22,16 +26,39 @@ namespace Isra.Demos.Microservicios.Saldo
         {
             _configuration = configuration;
 
-            var config = new ConsumerConfig
+            _connectionString = _configuration["ConnectionStrings:PostgresSaldoConnection"];
+
+            var consumerConfig = new ConsumerConfig
             {
                 BootstrapServers = _configuration["Kafka:BootstrapServers"],
                 GroupId = "cuenta-saldo-consumer-group",
-                AutoOffsetReset = AutoOffsetReset.Earliest
+                AutoOffsetReset = AutoOffsetReset.Earliest,
+                EnableAutoCommit = false
             };
 
-            _consumer = new ConsumerBuilder<Ignore, string>(config).Build();
+            var producerConfig = new ProducerConfig
+            {
+                BootstrapServers = _configuration["Kafka:BootstrapServers"]
+            };
 
-            _connectionString = _configuration["ConnectionStrings:PostgresSaldoConnection"];
+            _consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
+
+            _producer = new ProducerBuilder<string, string>(producerConfig).Build();
+
+            _resiliencePipeline = new ResiliencePipelineBuilder()
+                .AddRetry(new RetryStrategyOptions
+                {
+                    ShouldHandle = new PredicateBuilder().Handle<NpgsqlException>().Handle<TimeoutException>(),
+                    MaxRetryAttempts = 3,
+                    Delay = TimeSpan.FromSeconds(2),
+                    BackoffType = DelayBackoffType.Exponential,
+                    OnRetry = args =>
+                    {
+                        // Aquí puedes usar ILogger para trazar el reintento
+                        Console.WriteLine($"Fallo transitorio en Postgres. Reintento {args.AttemptNumber} debido a: {args.Outcome.Exception?.Message}");
+                        return ValueTask.CompletedTask;
+                    }
+                }).Build();
         }
 
         /// <summary>
@@ -50,63 +77,88 @@ namespace Isra.Demos.Microservicios.Saldo
                     try
                     {
                         var result = _consumer.Consume(stoppingToken);
-                        var eventoJson = result.Message.Value;
 
-                        // 1. Analizamos el JSON sin deserializarlo a clase todavía
-                        using JsonDocument doc = JsonDocument.Parse(eventoJson);
-                        JsonElement root = doc.RootElement;
+                        if (result is null)
+                            continue;
 
-                        // 2. Buscamos la propiedad que diferencia el evento (ej. "TipoEvento")
-                        string tipoEvento = root.GetProperty("TipoEvento").GetString();
-
-                        switch (tipoEvento)
+                        try
                         {
-                            case "DineroDepositadoEvento":
-                                var deposito = JsonSerializer.Deserialize<DineroDepositadoEvento>(eventoJson);
+                            var eventoJson = result.Message.Value;
 
-                                await ActualizarSaldo(deposito, esDeposito: true);
+                            // 1. Analizamos el JSON sin deserializarlo a clase todavía
+                            using JsonDocument doc = JsonDocument.Parse(eventoJson);
+                            JsonElement root = doc.RootElement;
 
-                                Console.WriteLine($"Deposito: {deposito.AggregateId} {deposito.Monto}");
+                            // 2. Buscamos la propiedad que diferencia el evento (ej. "TipoEvento")
+                            string tipoEvento = root.GetProperty("TipoEvento").GetString();
 
-                                break;
+                            switch (tipoEvento)
+                            {
+                                case "DineroDepositadoEvento":
+                                    var deposito = JsonSerializer.Deserialize<DineroDepositadoEvento>(eventoJson);
 
-                            case "DineroRetiradoEvento":
-                                var retiro = JsonSerializer.Deserialize<DineroRetiradoEvento>(eventoJson);
+                                    await ActualizarSaldo(deposito, esDeposito: true);
 
-                                await ActualizarSaldo(retiro, esDeposito: false);
+                                    _consumer.Commit(result);
 
-                                Console.WriteLine($"Retiro: {retiro.AggregateId} {retiro.Monto}");
+                                    Console.WriteLine($"Deposito: {deposito.AggregateId} {deposito.Monto}");
 
-                                break;
+                                    break;
 
-                            case "TransferenciaRealizadaEvento":
-                                var transferenciaEnviada = JsonSerializer.Deserialize<TransferenciaRealizadaEvento>(eventoJson);
+                                case "DineroRetiradoEvento":
+                                    var retiro = JsonSerializer.Deserialize<DineroRetiradoEvento>(eventoJson);
 
-                                await ActualizarSaldo(transferenciaEnviada, esDeposito: false);
+                                    await ActualizarSaldo(retiro, esDeposito: false);
 
-                                Console.WriteLine($"Retiro por transferencia: {transferenciaEnviada.AggregateId} {transferenciaEnviada.Monto}");
+                                    _consumer.Commit(result);
 
-                                break;
+                                    Console.WriteLine($"Retiro: {retiro.AggregateId} {retiro.Monto}");
 
-                            case "TransferenciaRecibidaEvento":
-                                var transferenciaRecibida = JsonSerializer.Deserialize<TransferenciaRecibidaEvento>(eventoJson);
+                                    break;
 
-                                await ActualizarSaldo(transferenciaRecibida, esDeposito: true);
+                                case "TransferenciaRealizadaEvento":
+                                    var transferenciaEnviada = JsonSerializer.Deserialize<TransferenciaRealizadaEvento>(eventoJson);
 
-                                Console.WriteLine($"Deposito por transferencia: {transferenciaRecibida.AggregateId} {transferenciaRecibida.Monto}");
+                                    await ActualizarSaldo(transferenciaEnviada, esDeposito: false);
 
-                                break;
+                                    _consumer.Commit(result);
 
-                            case "TransferenciaDevueltaEvento":
-                                var transferenciaDevuelta = JsonSerializer.Deserialize<TransferenciaDevueltaEvento>(eventoJson);
+                                    Console.WriteLine($"Retiro por transferencia: {transferenciaEnviada.AggregateId} {transferenciaEnviada.Monto}");
 
-                                await ActualizarSaldo(transferenciaDevuelta, esDeposito: true);
+                                    break;
 
-                                Console.WriteLine($"Deposito por devolución: {transferenciaDevuelta.AggregateId} {transferenciaDevuelta.Monto}");
+                                case "TransferenciaRecibidaEvento":
+                                    var transferenciaRecibida = JsonSerializer.Deserialize<TransferenciaRecibidaEvento>(eventoJson);
 
-                                break;
-                            default:
-                                break;
+                                    await ActualizarSaldo(transferenciaRecibida, esDeposito: true);
+
+                                    _consumer.Commit(result);
+
+                                    Console.WriteLine($"Deposito por transferencia: {transferenciaRecibida.AggregateId} {transferenciaRecibida.Monto}");
+
+                                    break;
+
+                                case "TransferenciaDevueltaEvento":
+                                    var transferenciaDevuelta = JsonSerializer.Deserialize<TransferenciaDevueltaEvento>(eventoJson);
+
+                                    await ActualizarSaldo(transferenciaDevuelta, esDeposito: true);
+
+                                    _consumer.Commit(result);
+
+                                    Console.WriteLine($"Deposito por devolución: {transferenciaDevuelta.AggregateId} {transferenciaDevuelta.Monto}");
+
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine($"Error crítico procesando el evento {result.Message.Key}. Enviando a Retry/DLQ.");
+
+                            await EnviarARetryODlqAsync(result.Message);
+
+                            _consumer.Commit(result);
                         }
                     }
                     catch (OperationCanceledException) { break; }
@@ -116,24 +168,31 @@ namespace Isra.Demos.Microservicios.Saldo
             }, stoppingToken);
         }
 
+        private async Task EnviarARetryODlqAsync(Message<string, string> message)
+        {
+            await _producer.ProduceAsync(_configuration.GetValue<string>("Kafka:TopicDlq"), message);
+        }
+
         private async Task ActualizarSaldo(EventoBase evento, bool esDeposito)
         {
-            using var conn = new NpgsqlConnection(_connectionString);
+            await _resiliencePipeline.ExecuteAsync(async token =>
+            {
+                using var conn = new NpgsqlConnection(_connectionString);
 
-            await conn.OpenAsync();
+                await conn.OpenAsync();
 
-            // El monto depende de si es deposito o retiro
-            decimal montoModificador = 0;
+                // El monto depende de si es deposito o retiro
+                decimal montoModificador = 0;
 
-            if (evento is DineroDepositadoEvento d) { montoModificador = d.Monto; }
-            if (evento is DineroRetiradoEvento r) { montoModificador = -r.Monto; }
-            if (evento is TransferenciaRealizadaEvento t) { montoModificador = -t.Monto; }
-            if (evento is TransferenciaDevueltaEvento td) { montoModificador = td.Monto; }
-            if (evento is TransferenciaRecibidaEvento tr) { montoModificador = tr.Monto; }
+                if (evento is DineroDepositadoEvento d) { montoModificador = d.Monto; }
+                if (evento is DineroRetiradoEvento r) { montoModificador = -r.Monto; }
+                if (evento is TransferenciaRealizadaEvento t) { montoModificador = -t.Monto; }
+                if (evento is TransferenciaDevueltaEvento td) { montoModificador = td.Monto; }
+                if (evento is TransferenciaRecibidaEvento tr) { montoModificador = tr.Monto; }
 
-            // SQL Upsert con validación de versión
-            // Solo actualiza si la versión del evento es mayor a la que tenemos
-            string sql = @"
+                // SQL Upsert con validación de versión
+                // Solo actualiza si la versión del evento es mayor a la que tenemos
+                string sql = @"
             INSERT INTO cuentas.saldos_cuenta (id, saldo, ultima_version)
             VALUES (@Id, @Monto, @Version)
             ON CONFLICT (id) DO UPDATE 
@@ -142,11 +201,12 @@ namespace Isra.Demos.Microservicios.Saldo
                 ultima_actualizacion = CURRENT_TIMESTAMP
             WHERE cuentas.saldos_cuenta.ultima_version < EXCLUDED.ultima_version;";
 
-            await conn.ExecuteAsync(sql, new
-            {
-                Id = evento.AggregateId,
-                Monto = montoModificador,
-                evento.Version
+                await conn.ExecuteAsync(sql, new
+                {
+                    Id = evento.AggregateId,
+                    Monto = montoModificador,
+                    evento.Version
+                });
             });
         }
     }

@@ -1,6 +1,7 @@
 using Dapper;
 using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
 using Microsoft.Data.SqlClient;
+using Polly;
 using System.Data;
 
 namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
@@ -11,14 +12,19 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
     public class CuentaRepositorio : ICuentaRepositorio
     {
         private readonly string _connectionString;
+        private readonly ResiliencePipeline _pipeline;
 
         /// <summary>
-        /// Constructor de la clase CuentaRepositorio, que inicializa la cadena de conexión a la base de datos utilizando una constante definida en la clase Constantes. Esta cadena de conexión es fundamental para establecer la comunicación entre la aplicación y la base de datos SQL Server, permitiendo así el almacenamiento y recuperación de información relacionada con las cuentas bancarias y otros datos relevantes para el funcionamiento del sistema. Al utilizar una cadena de conexión local, se facilita el desarrollo y las pruebas de la aplicación en un entorno controlado, aunque en un entorno de producción se recomendaría utilizar una configuración más robusta y segura para la conexión a la base de datos.
+        /// Constructor
         /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="resiliencePipeline"></param>
         public CuentaRepositorio(
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ResiliencePipeline resiliencePipeline)
         {
             _connectionString = configuration.GetConnectionString("SqlServerBancoCuentasConnectionString");
+            _pipeline = resiliencePipeline;
         }
 
         /// <summary>
@@ -29,11 +35,13 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
         /// <exception cref="NotImplementedException"></exception>
         public async Task<bool> CrearCuentaAsync(CuentaUsuario cuenta)
         {
-            using var cnn = new SqlConnection(_connectionString);
+            return await _pipeline.ExecuteAsync(async token =>
+              {
+                  using var cnn = new SqlConnection(_connectionString);
 
-            await cnn.OpenAsync();
+                  await cnn.OpenAsync();
 
-            await cnn.ExecuteAsync(@"
+                  await cnn.ExecuteAsync(@"
             INSERT INTO [dbo].[TblCuentasUsuario]
             ([Id]
             ,[IdCuenta]
@@ -43,19 +51,20 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
             ,[Estatus]
             ,[Usuario]
             ,[Secreto]) VALUES (@Id, @IdCuenta, @Propietario, @FechaHoraCreacion, @FechaHoraModificacion, @Estatus, @Usuario, @Secreto)",
-            new
-            {
-                Id = cuenta.Id,
-                IdCuenta = cuenta.IdCuenta,
-                Propietario = cuenta.Propietario,
-                FechaHoraCreacion = cuenta.FechaHoraCreacion,
-                FechaHoraModificacion = cuenta.FechaHoraModificacion,
-                Estatus = cuenta.Estatus,
-                Usuario = cuenta.Usuario,
-                Secreto = cuenta.Secreto
-            }, commandType: CommandType.Text);
+                  new
+                  {
+                      Id = cuenta.Id,
+                      IdCuenta = cuenta.IdCuenta,
+                      Propietario = cuenta.Propietario,
+                      FechaHoraCreacion = cuenta.FechaHoraCreacion,
+                      FechaHoraModificacion = cuenta.FechaHoraModificacion,
+                      Estatus = cuenta.Estatus,
+                      Usuario = cuenta.Usuario,
+                      Secreto = cuenta.Secreto
+                  }, commandType: CommandType.Text);
 
-            return true;
+                  return true;
+              });
         }
 
         /// <summary>
@@ -63,13 +72,16 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
         /// </summary>
         public async Task<bool> ExisteUsuarioAsync(string usuario)
         {
-            using var cnn = new SqlConnection(_connectionString);
-            await cnn.OpenAsync();
-            var count = await cnn.ExecuteScalarAsync<int>(
-                "SELECT COUNT(1) FROM [dbo].[TblCuentasUsuario] WHERE Usuario = @Usuario", 
-                new { Usuario = usuario }
-            );
-            return count > 0;
+            return await _pipeline.ExecuteAsync(async token =>
+             {
+                 using var cnn = new SqlConnection(_connectionString);
+                 await cnn.OpenAsync();
+                 var count = await cnn.ExecuteScalarAsync<int>(
+                     "SELECT COUNT(1) FROM [dbo].[TblCuentasUsuario] WHERE Usuario = @Usuario",
+                     new { Usuario = usuario }
+                 );
+                 return count > 0;
+             });
         }
 
         /// <summary>
@@ -77,12 +89,15 @@ namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
         /// </summary>
         public async Task<CuentaUsuario> ObtenerCuentaPorUsuarioAsync(string usuario)
         {
-            using var cnn = new SqlConnection(_connectionString);
-            await cnn.OpenAsync();
-            return await cnn.QueryFirstOrDefaultAsync<CuentaUsuario>(
-                "SELECT * FROM [dbo].[TblCuentasUsuario] WHERE Usuario = @Usuario AND Estatus = 1",
-                new { Usuario = usuario }
-            );
+            return await _pipeline.ExecuteAsync(async token =>
+            {
+                using var cnn = new SqlConnection(_connectionString);
+                await cnn.OpenAsync();
+                return await cnn.QueryFirstOrDefaultAsync<CuentaUsuario>(
+                    "SELECT * FROM [dbo].[TblCuentasUsuario] WHERE Usuario = @Usuario AND Estatus = 1",
+                    new { Usuario = usuario }
+                );
+            });
         }
     }
 }

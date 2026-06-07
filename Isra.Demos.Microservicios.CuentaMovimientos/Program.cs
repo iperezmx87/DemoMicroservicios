@@ -4,9 +4,12 @@ using Isra.Demos.Microservicios.CuentaMovimientos.Consultas;
 using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
 using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
+using Polly;
+using Polly.Retry;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,6 +49,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+// polly
+var resiliencePipeline = new ResiliencePipelineBuilder()
+    .AddRetry(new RetryStrategyOptions
+    {
+        ShouldHandle = new PredicateBuilder().Handle<SqlException>().Handle<TimeoutException>(),
+        MaxRetryAttempts = 3,
+        Delay = TimeSpan.FromSeconds(2),
+        BackoffType = DelayBackoffType.Exponential,
+        OnRetry = args =>
+        {
+            // Aquí puedes usar ILogger para trazar el reintento
+            Console.WriteLine($"Fallo transitorio en MongoDB. Reintento {args.AttemptNumber} debido a: {args.Outcome.Exception?.Message}");
+            return ValueTask.CompletedTask;
+        }
+    }).Build();
+
+builder.Services.AddSingleton(resiliencePipeline);
 
 // Configuración de MongoDB para ignorar campos adicionales que no estén mapeados en las clases de eventos. Esto es útil para evitar errores de deserialización si se agregan nuevos campos a los eventos en el futuro.
 var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };

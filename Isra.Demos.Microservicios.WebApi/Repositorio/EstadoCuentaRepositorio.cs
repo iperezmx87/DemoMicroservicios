@@ -2,6 +2,7 @@
 using Isra.Demos.Microservicios.WebApi.Contratos;
 using Isra.Demos.Microservicios.WebApi.Modelo;
 using Microsoft.Data.SqlClient;
+using Polly;
 
 namespace Isra.Demos.Microservicios.WebApi.Repositorio
 {
@@ -14,16 +15,23 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
         private readonly string _cnnTblUsuarios;
         private readonly ISaldoRepositorio _saldoRepositorio;
         private readonly IConfiguration _configuration;
+        private readonly ResiliencePipeline _resiliencePipeline;
 
         /// <summary>
-        /// Constructor del repositorio de estado de cuenta, se encarga de inicializar la conexión a la base de datos utilizando la cadena de conexión definida en las constantes.
+        /// Constructor
         /// </summary>
-        public EstadoCuentaRepositorio(ISaldoRepositorio saldoRepositorio, IConfiguration configuration)
+        /// <param name="saldoRepositorio"></param>
+        /// <param name="configuration"></param>
+        /// <param name="resiliencePipeline"></param>
+        public EstadoCuentaRepositorio(ISaldoRepositorio saldoRepositorio,
+            IConfiguration configuration,
+            ResiliencePipeline resiliencePipeline)
         {
             _configuration = configuration;
             _connecionString = _configuration.GetValue<string>("ConnectionStrings:SQLServerEstadoCuentaConnectionString");
             _cnnTblUsuarios = _configuration.GetValue<string>("ConnectionStrings:SqlServerBancoCuentasConnectionString");
             _saldoRepositorio = saldoRepositorio;
+            _resiliencePipeline = resiliencePipeline;
         }
 
         /// <summary>
@@ -33,32 +41,35 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
         /// <returns></returns>
         public async Task<CuentaDto> ObtenerEstadoCuentaAsync(Guid aggregateId)
         {
-            using var connection = new SqlConnection(_connecionString);
+            return await _resiliencePipeline.ExecuteAsync(async token =>
+            {
+                using var connection = new SqlConnection(_connecionString);
 
-            await connection.OpenAsync();
+                await connection.OpenAsync();
 
-            // obtener los datos de la tabla TblCuentasUsuario
-            var cuentaUsuario = await ObtenerCuentaAsync(aggregateId);
+                // obtener los datos de la tabla TblCuentasUsuario
+                var cuentaUsuario = await ObtenerCuentaAsync(aggregateId);
 
-            // obtiene los movimientos de la cuenta
-            var movimientos =
-                await connection.QueryAsync<CuentaMovimientoDto>(
-                    @"SELECT TipoMovimiento, Monto, FechaEvento, 
+                // obtiene los movimientos de la cuenta
+                var movimientos =
+                    await connection.QueryAsync<CuentaMovimientoDto>(
+                        @"SELECT TipoMovimiento, Monto, FechaEvento, 
                       ISNULL(MotivoDevolucion, '') as MotivoDevolucion 
                       FROM MovimientosCuenta(NOLOCK) 
                       WHERE AggregateId = @AggregateId order by FechaEvento desc",
-                    new { AggregateId = aggregateId });
+                        new { AggregateId = aggregateId });
 
-            if (movimientos.Any())
-            {
-                // cargar el saldo
-                cuentaUsuario.Saldo = await _saldoRepositorio.GetSaldoActualAsync(aggregateId);
+                if (movimientos.Any())
+                {
+                    // cargar el saldo
+                    cuentaUsuario.Saldo = await _saldoRepositorio.GetSaldoActualAsync(aggregateId);
 
-                // movimientos
-                cuentaUsuario.Movimientos = movimientos.ToArray();
-            }
+                    // movimientos
+                    cuentaUsuario.Movimientos = movimientos.ToArray();
+                }
 
-            return cuentaUsuario;
+                return cuentaUsuario;
+            });
         }
 
         /// <summary>
@@ -68,18 +79,21 @@ namespace Isra.Demos.Microservicios.WebApi.Repositorio
         /// <returns></returns>
         private async Task<CuentaDto> ObtenerCuentaAsync(Guid aggregateId)
         {
-            using var connection = new SqlConnection(_cnnTblUsuarios);
+            return await _resiliencePipeline.ExecuteAsync(async token =>
+            {
+                using var connection = new SqlConnection(_cnnTblUsuarios);
 
-            await connection.OpenAsync();
+                await connection.OpenAsync();
 
-            // obtener los datos de la tabla TblCuentasUsuario
-            var cuentaUsuario = await connection.QueryFirstOrDefaultAsync<CuentaDto>(
-                @"SELECT IdCuenta AggregateId, Propietario 
+                // obtener los datos de la tabla TblCuentasUsuario
+                var cuentaUsuario = await connection.QueryFirstOrDefaultAsync<CuentaDto>(
+                    @"SELECT IdCuenta AggregateId, Propietario 
                   FROM TblCuentasUsuario (NOLOCK)
                   WHERE IdCuenta = @AggregateId",
-                new { AggregateId = aggregateId });
+                    new { AggregateId = aggregateId });
 
-            return cuentaUsuario;
+                return cuentaUsuario;
+            });
         }
     }
 }
