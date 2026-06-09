@@ -93,7 +93,44 @@ builder.Services.AddScoped<ObtenerCuentaPorIdConsulta>();
 // agregar servicio background para procesar los mensajes de salida
 builder.Services.AddHostedService<ProcesadorMensajesSalidaService>();
 
+// healthckeck
+builder.Services.AddHealthChecks()
+    .AddKafka(
+        setup => setup.BootstrapServers = builder.Configuration.GetValue<string>("Kafka:BootstrapServers")!,
+        name: "kafka",
+        failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+        tags: new[] { "ready", "broker" })
+    .AddMongoDb(
+        sp => sp.GetRequiredService<IMongoClient>(),
+        name: "MongoDB-EventStore",
+        failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+        tags: new[] { "ready", "db" }
+    );
+
 var app = builder.Build();
+
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => true,
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+
+        var result = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            status = report.Status.ToString(),
+            duration = report.TotalDuration,
+            components = report.Entries.Select(e => new
+            {
+                key = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description
+            })
+        });
+
+        await context.Response.WriteAsync(result);
+    }
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.EnvironmentName == "Development")
