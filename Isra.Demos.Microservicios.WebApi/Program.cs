@@ -10,6 +10,14 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHealthChecks()
+    .AddNpgSql(
+    builder.Configuration.GetConnectionString("PostgresSaldoConnection")!,
+    name: "Postgres-Saldo")
+    .AddSqlServer(
+    builder.Configuration.GetConnectionString("SQLServerEstadoCuentaConnectionString")!,
+    name: "SQL Server - Cuentas");
+
 // Configuración de CORS para permitir al frontend conectarse
 builder.Services.AddCors(options =>
 {
@@ -72,6 +80,29 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => true,
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+
+        var result = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            status = report.Status.ToString(),
+            duration = report.TotalDuration,
+            components = report.Entries.Select(e => new
+            {
+                key = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description
+            })
+        });
+
+        await context.Response.WriteAsync(result);
+    }
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
