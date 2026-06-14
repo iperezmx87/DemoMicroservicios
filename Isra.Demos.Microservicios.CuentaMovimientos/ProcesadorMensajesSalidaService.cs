@@ -1,7 +1,9 @@
 ﻿using Confluent.Kafka;
+using Isra.Demos.Microservicios.CuentaMovimientos.Infrastructure;
 using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
 using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
 using MongoDB.Driver;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace Isra.Demos.Microservicios.CuentaMovimientos
@@ -50,36 +52,75 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos
 
                 foreach (var msg in mensajesPendientes)
                 {
-                    Tuple<string, string> tplResultPublicar = new Tuple<string, string>("", "");
+                    // 2. Reconstruimos el contexto de la traza original almacenado en el documento de Mongo
+                    var parentContext = string.IsNullOrEmpty(msg.TraceId)
+                        ? default
+                        : ActivityContext.Parse(msg.TraceId, null);
 
-                    switch (JsonDocument.Parse(msg.Payload).RootElement.GetProperty("TipoEvento").GetString())
+                    // 3. Iniciamos un Span de tipo Producer que enlaza al flujo original del API
+                    using Activity activity = MicroservicioTelemetry.Source.StartActivity(
+                        "Outbox Relay: Publicar a Kafka",
+                        ActivityKind.Producer,
+                        parentContext);
+
+                    var tipoEvento = JsonDocument.Parse(msg.Payload).RootElement.GetProperty("TipoEvento").GetString();
+
+                    // Enriquecemos la traza con metadata útil para el diagnóstico corporativo
+                    if (activity != null)
                     {
-                        case "DineroDepositadoEvento":
-                            tplResultPublicar =
-                                await _colaMensajesService.PublicarDineroDepositadoEventoAsync(
-                                    JsonSerializer.Deserialize<DineroDepositadoEvento>(msg.Payload));
-                            break;
-                        case "DineroRetiradoEvento":
-                            tplResultPublicar =
-                                await _colaMensajesService.PublicarDineroRetiradoEventoAsync(
-                                    JsonSerializer.Deserialize<DineroRetiradoEvento>(msg.Payload));
-                            break;
-
-                        case "TransferenciaRealizadaEvento":
-                            tplResultPublicar = await _colaMensajesService.PublicarTransferenciaRealizadaEventoAsync(
-                                JsonSerializer.Deserialize<TransferenciaRealizadaEvento>(msg.Payload));
-                            break;
-
-                        default:
-                            break;
+                        activity.SetTag("messaging.system", "kafka");
+                        activity.SetTag("messaging.operation", "publish");
+                        activity.SetTag("banco.evento.tipo", tipoEvento);
+                        activity.SetTag("outbox.mensaje.id", msg.Id.ToString());
                     }
 
-                    if (tplResultPublicar.Item2 == nameof(PersistenceStatus.Persisted))
+                    Tuple<string, string> tplResultPublicar = new Tuple<string, string>("", "");
+
+                    try
                     {
-                        await _outboxCollection.UpdateOneAsync(
-                            m => m.Id == msg.Id,
-                            Builders<MensajeSalida>.Update.Set(m => m.Processed, true)
-                        );
+
+                        switch (JsonDocument.Parse(msg.Payload).RootElement.GetProperty("TipoEvento").GetString())
+                        {
+                            case "DineroDepositadoEvento":
+                                tplResultPublicar =
+                                    await _colaMensajesService.PublicarDineroDepositadoEventoAsync(
+                                        JsonSerializer.Deserialize<DineroDepositadoEvento>(msg.Payload));
+                                break;
+                            case "DineroRetiradoEvento":
+                                tplResultPublicar =
+                                    await _colaMensajesService.PublicarDineroRetiradoEventoAsync(
+                                        JsonSerializer.Deserialize<DineroRetiradoEvento>(msg.Payload));
+                                break;
+
+                            case "TransferenciaRealizadaEvento":
+                                tplResultPublicar = await _colaMensajesService.PublicarTransferenciaRealizadaEventoAsync(
+                                    JsonSerializer.Deserialize<TransferenciaRealizadaEvento>(msg.Payload));
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        if (tplResultPublicar.Item2 == nameof(PersistenceStatus.Persisted))
+                        {
+                            await _outboxCollection.UpdateOneAsync(
+                                m => m.Id == msg.Id,
+                                Builders<MensajeSalida>.Update.Set(m => m.Processed, true)
+                            );
+
+                            activity?.SetStatus(ActivityStatusCode.Ok);
+                        }
+                        else
+                        {
+                            activity?.SetStatus(ActivityStatusCode.Error, "Kafka rechazó o no confirmó la persistencia del evento.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // 4. Si el relay truena (por ejemplo, Kafka caído), registramos el fallo en OTel
+                        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                        activity?.AddException(ex);
+                        throw;
                     }
                 }
 

@@ -5,6 +5,10 @@ using Npgsql;
 using Polly;
 using Polly.Retry;
 using System.Text.Json;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
+using System.Diagnostics;
+using System.Text;
 
 namespace Isra.Demos.Microservicios.Saldo
 {
@@ -18,11 +22,15 @@ namespace Isra.Demos.Microservicios.Saldo
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
         private readonly ResiliencePipeline _resiliencePipeline;
+        private readonly ILogger<SaldoConsumerService> _logger;
+        // Usamos el mismo propagador W3C que configuramos en el productor
+        private static readonly TextMapPropagator Propagator = Propagators.DefaultTextMapPropagator;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public SaldoConsumerService(IConfiguration configuration)
+        public SaldoConsumerService(IConfiguration configuration,
+            ILogger<SaldoConsumerService> logger)
         {
             _configuration = configuration;
 
@@ -59,6 +67,8 @@ namespace Isra.Demos.Microservicios.Saldo
                         return ValueTask.CompletedTask;
                     }
                 }).Build();
+
+            _logger = logger;
         }
 
         /// <summary>
