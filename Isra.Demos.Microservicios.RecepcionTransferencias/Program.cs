@@ -1,15 +1,44 @@
 using Isra.Demos.Microservicios.RecepcionTransferencias;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Configuracion;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Consultas;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Infrastructure;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
 using Microsoft.Data.SqlClient;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Polly;
 using Polly.Retry;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// 1. Configurar OpenTelemetry (Traces, Metrics y Logs)
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService(MicroservicioTelemetry.ServiceName))
+    .WithTracing(tracing => tracing
+        .AddSource(MicroservicioTelemetry.Source.Name) // Escucha nuestros eventos personalizados
+        .AddAspNetCoreInstrumentation()          // Rastrea llamadas HTTP entrantes automáticamente
+        .AddOtlpExporter(options =>
+        {
+            // Apunta al puerto gRPC estándar del OpenTelemetry Collector o Jaeger
+            options.Endpoint = new Uri(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? "http://localhost:4317");
+        }))
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddRuntimeInstrumentation()             // Métricas del CLR, GC y ThreadPool de .NET 10
+        .AddOtlpExporter());
+
+// 2. Correlacionar los Logs nativos de .NET con OpenTelemetry
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options.IncludeFormattedMessage = true;
+    options.IncludeScopes = true;
+    options.AddOtlpExporter();
+});
 
 var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
 ConventionRegistry.Register("IgnoreExtraElements", conventionPack, type => true);

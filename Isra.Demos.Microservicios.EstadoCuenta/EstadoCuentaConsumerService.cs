@@ -2,8 +2,11 @@ using Confluent.Kafka;
 using Dapper;
 using Isra.Demos.Microservicios.EstadoCuenta.Modelo;
 using Microsoft.Data.SqlClient;
+using OpenTelemetry.Context.Propagation;
 using Polly;
 using Polly.Retry;
+using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 
 namespace Isra.Demos.Microservicios.EstadoCuenta
@@ -18,6 +21,8 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
         private readonly IProducer<string, string> _producer;
         private readonly IConfiguration _configuration;
         private readonly ResiliencePipeline _resiliencePipeline;
+        // Usamos el mismo propagador W3C que configuramos en el productor
+        private static readonly TextMapPropagator Propagator = Propagators.DefaultTextMapPropagator;
 
         /// <summary>
         /// Constructor del servicio, que inicializa la conexión a la base de datos y el consumidor de Kafka.
@@ -80,6 +85,23 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
 
                         if (result is null)
                             continue;
+
+                        // 1. EXTRAER EL CONTEXTO: Leemos los headers binarios de Kafka
+                        var parentContext = Propagator.Extract(default, result.Message.Headers, ExtractTraceContext);
+
+                        // 2. INICIAR ACTIVIDAD HIJA: Arrancamos un Span tipo 'Consumer' amarrado al TraceId original
+                        // Pasamos 'parentContext.ActivityContext' para que herede la identidad exacta
+                        using Activity activity = SaldoTelemetry.Source.StartActivity(
+                            "Kafka Consume: Actualizando el estado de cuenta",
+                            ActivityKind.Consumer,
+                            parentContext.ActivityContext);
+
+                        if (activity != null)
+                        {
+                            activity.SetTag("messaging.system", "kafka");
+                            activity.SetTag("messaging.destination", result.Topic);
+                            activity.SetTag("messaging.kafka.key", result.Message.Key);
+                        }
 
                         try
                         {
@@ -149,10 +171,15 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
                                 default:
                                     break;
                             }
+
+                            activity?.SetStatus(ActivityStatusCode.Ok);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             Console.WriteLine($"Error crítico procesando el evento {result.Message.Key}. Enviando a Retry/DLQ.");
+
+                            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                            activity?.AddException(ex);
 
                             await EnviarARetryODlqAsync(result.Message);
 
@@ -176,6 +203,18 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
         private async Task EnviarARetryODlqAsync(Message<string, string> message)
         {
             await _producer.ProduceAsync(_configuration.GetValue<string>("Kafka:TopicDlq"), message);
+        }
+
+        /// <summary>
+        /// Función auxiliar que OpenTelemetry usa para leer los datos del Header de Confluent.Kafka
+        /// </summary>
+        private IEnumerable<string> ExtractTraceContext(Headers headers, string key)
+        {
+            if (headers.TryGetLastBytes(key, out var bytes))
+            {
+                return [Encoding.UTF8.GetString(bytes)];
+            }
+            return Enumerable.Empty<string>();
         }
 
         private async Task RegistrarMovimiento(dynamic evento, string tipo)
@@ -204,5 +243,16 @@ namespace Isra.Demos.Microservicios.EstadoCuenta
                 });
             });
         }
+    }
+
+    /// <summary>
+    /// Clase de telemetría segura aislada para el microservicio de Saldo
+    /// </summary>
+    public static class SaldoTelemetry
+    {
+        /// <summary>
+        /// Fuente del trace
+        /// </summary>
+        public static ActivitySource Source { get; } = new("Isra.Demos.Microservicios.EstadoCuenta");
     }
 }

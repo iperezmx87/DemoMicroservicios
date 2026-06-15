@@ -1,5 +1,9 @@
 ﻿using Confluent.Kafka;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
+using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 
 namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
@@ -57,13 +61,31 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
 
         private async Task<Tuple<string, string>> PublicarEventoAsync(string llave, string mensaje)
         {
-            var resultado =
-                 await _producer.ProduceAsync(
-                     _configuration.GetValue<string>("Kafka:Topic"), new Message<string, string>
-                     {
-                         Key = llave,
-                         Value = mensaje
-                     });
+            // 4. Creamos el objeto Message e inicializamos su colección de Headers
+            var kafkaMessage = new Message<string, string>
+            {
+                Key = llave,
+                Value = mensaje,
+                Headers = new Headers()
+            };
+
+            // 5. Si hay una actividad (Span) activa en este hilo (la que abrimos en el Outbox BackgroundService),
+            // inyectamos su TraceId de forma síncrona en los headers binarios de Kafka usando el estándar W3C.
+            if (Activity.Current != null)
+            {
+                var propagationContext = new PropagationContext(Activity.Current.Context, Baggage.Current);
+
+                Propagators.DefaultTextMapPropagator.Inject(propagationContext, kafkaMessage.Headers, (headers, key, value) =>
+                {
+                    // Kafka maneja los valores de los headers estrictamente como arreglos de bytes (byte[])
+                    headers.Add(key, Encoding.UTF8.GetBytes(value));
+                });
+            }
+
+            // 6. Publicamos el mensaje enriquecido al tópico correspondiente
+            var resultado = await _producer.ProduceAsync(
+                 _configuration.GetValue<string>("Kafka:Topic"),
+                 kafkaMessage);
 
             return Tuple.Create(resultado.Topic, Enum.GetName(resultado.Status));
         }

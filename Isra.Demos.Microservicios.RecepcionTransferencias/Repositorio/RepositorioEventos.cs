@@ -1,5 +1,7 @@
+using Isra.Demos.Microservicios.RecepcionTransferencias.Infrastructure;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
 using MongoDB.Driver;
+using System.Diagnostics;
 
 namespace Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio
 {
@@ -37,13 +39,17 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio
         /// <returns></returns>
         public async Task GuardarEventoAsync(EventoBase evento)
         {
+            using Activity activity = MicroservicioTelemetry.Source.StartActivity("MongoDB: Guardar evento y mensaje Outbox", System.Diagnostics.ActivityKind.Internal);
+            activity.SetTag("cuenta.id", evento.AggregateId);
+            activity.SetTag("evento.id", evento.EventId);
+
             using var session = await _client.StartSessionAsync();
             session.StartTransaction();
 
             try
             {
                 // almacena el evento nuevo
-                await _collection.InsertOneAsync(session,evento);
+                await _collection.InsertOneAsync(session, evento);
 
                 // guarda la tabla outbox
                 var outboxMessage = new MensajeSalida
@@ -51,7 +57,8 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio
                     Topic = _configuration.GetValue<string>("Kafka:Topic"),
                     Id = evento.EventId,
                     OccurredOn = DateTime.UtcNow,
-                    Processed = false
+                    Processed = false,
+                    TraceId = Activity.Current.Id ?? string.Empty
                 };
 
                 switch (evento.TipoEvento)
@@ -71,9 +78,14 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio
 
                 await session.CommitTransactionAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 await session.AbortTransactionAsync();
+
+                // Si falla, marcamos la actividad como errónea y guardamos la excepción
+                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                activity?.AddException(ex);
+
                 throw;
             }
         }
