@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Infrastructure
+namespace Isra.Demos.Microservicios.Saldo.Monitoreo
 {
     /// <summary>
     /// Configuracion de open telemetry
@@ -22,7 +22,7 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Infrastructure
         /// </summary>
         static MicroservicioTelemetry()
         {
-            Source = new ActivitySource("Isra.Demos.Microservicios.CuentaMovimientos");
+            Source = new ActivitySource("Isra.Demos.Microservicios.Saldo");
         }
     }
 }

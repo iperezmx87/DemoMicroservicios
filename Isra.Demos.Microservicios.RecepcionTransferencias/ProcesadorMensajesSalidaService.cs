@@ -1,5 +1,5 @@
 ﻿using Confluent.Kafka;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Infrastructure;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Monitoreo;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
 using MongoDB.Driver;
@@ -59,7 +59,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
 
                     // 3. Iniciamos un Span de tipo Producer que enlaza al flujo original del API
                     using Activity activity = MicroservicioTelemetry.Source.StartActivity(
-                        "Outbox Relay: Publicar a Kafka",
+                        "Outbox Relay - Receptor transferencias: Publicar a Kafka",
                         ActivityKind.Producer,
                         parentContext);
 

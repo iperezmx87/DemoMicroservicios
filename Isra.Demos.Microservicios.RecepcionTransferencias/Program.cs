@@ -1,7 +1,7 @@
 using Isra.Demos.Microservicios.RecepcionTransferencias;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Configuracion;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Consultas;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Infrastructure;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Monitoreo;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
 using Microsoft.Data.SqlClient;

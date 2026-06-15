@@ -1,4 +1,4 @@
-using Isra.Demos.Microservicios.RecepcionTransferencias.Infrastructure;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Monitoreo;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
 using MongoDB.Driver;
 using System.Diagnostics;
@@ -39,7 +39,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio
         /// <returns></returns>
         public async Task GuardarEventoAsync(EventoBase evento)
         {
-            using Activity activity = MicroservicioTelemetry.Source.StartActivity("MongoDB: Guardar evento y mensaje Outbox", System.Diagnostics.ActivityKind.Internal);
+            using Activity activity = MicroservicioTelemetry.Source.StartActivity("MongoDB - ReceptorTransferencias: Guardar evento y mensaje Outbox", System.Diagnostics.ActivityKind.Internal);
             activity.SetTag("cuenta.id", evento.AggregateId);
             activity.SetTag("evento.id", evento.EventId);
 

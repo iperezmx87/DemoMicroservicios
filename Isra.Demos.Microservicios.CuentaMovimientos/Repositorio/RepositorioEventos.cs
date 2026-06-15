@@ -1,7 +1,6 @@
-using Isra.Demos.Microservicios.CuentaMovimientos.Infrastructure;
 using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
+using Isra.Demos.Microservicios.CuentaMovimientos.Monitoreo;
 using MongoDB.Driver;
-using OpenTelemetry.Trace;
 using Polly;
 using System.Diagnostics;
 
@@ -47,7 +46,7 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
         {
             await _resiliencePipeline.ExecuteAsync(async token =>
             {
-                using Activity activity = MicroservicioTelemetry.Source.StartActivity("MongoDB: Guardar evento y mensaje Outbox", System.Diagnostics.ActivityKind.Internal);
+                using Activity activity = MicroservicioTelemetry.Source.StartActivity("MongoDB - CuentasMovimientos: Guardar evento y mensaje Outbox", System.Diagnostics.ActivityKind.Internal);
 
                 activity.SetTag("cuenta.id", evento.AggregateId);
                 activity.SetTag("evento.id", evento.EventId);

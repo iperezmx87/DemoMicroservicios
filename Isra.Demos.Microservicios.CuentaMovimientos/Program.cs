@@ -1,7 +1,7 @@
 using Isra.Demos.Microservicios.CuentaMovimientos;
 using Isra.Demos.Microservicios.CuentaMovimientos.Configuracion;
 using Isra.Demos.Microservicios.CuentaMovimientos.Consultas;
-using Isra.Demos.Microservicios.CuentaMovimientos.Infrastructure;
+using Isra.Demos.Microservicios.CuentaMovimientos.Monitoreo;
 using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
 using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
