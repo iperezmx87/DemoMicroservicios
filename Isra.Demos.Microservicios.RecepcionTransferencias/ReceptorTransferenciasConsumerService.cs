@@ -1,6 +1,9 @@
 ﻿using Confluent.Kafka;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
+using OpenTelemetry.Context.Propagation;
+using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 
 namespace Isra.Demos.Microservicios.RecepcionTransferencias
@@ -15,6 +18,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
         private readonly IProducer<string, string> _producer;
         private readonly IConfiguration _configuration;
         private readonly ICuentaBancariaService _cuentaBancariaService;
+        private static readonly TextMapPropagator Propagator = Propagators.DefaultTextMapPropagator;
 
         /// <summary>
         /// Constructor del servicio
@@ -67,6 +71,23 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
                         if (result is null)
                             continue;
 
+                        // 1. EXTRAER EL CONTEXTO: Leemos los headers binarios de Kafka
+                        var parentContext = Propagator.Extract(default, result.Message.Headers, ExtractTraceContext);
+
+                        // 2. INICIAR ACTIVIDAD HIJA: Arrancamos un Span tipo 'Consumer' amarrado al TraceId original
+                        // Pasamos 'parentContext.ActivityContext' para que herede la identidad exacta
+                        using Activity activity = SaldoTelemetry.Source.StartActivity(
+                            "Kafka Consume: Recibiendo una transferencia",
+                            ActivityKind.Consumer,
+                            parentContext.ActivityContext);
+
+                        if (activity != null)
+                        {
+                            activity.SetTag("messaging.system", "kafka");
+                            activity.SetTag("messaging.destination", result.Topic);
+                            activity.SetTag("messaging.kafka.key", result.Message.Key);
+                        }
+
                         try
                         {
                             var eventoJson = result.Message.Value;
@@ -90,12 +111,17 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
                                         _consumer.Commit(result);
 
                                         Console.WriteLine($"Recepción de transferencia: {recepcionTransferencia.AggregateId} {recepcionTransferencia.Monto}");
+
+                                        activity?.SetStatus(ActivityStatusCode.Ok);
                                     }
                                     catch (InvalidDataException ex)
                                     {
                                         // errores en la validación de la cuenta receptora o del monto
                                         // se tiene que efectuar la devolución del dinero al emisor, para lo cual se puede publicar un nuevo evento de devolución de transferencia
                                         Console.WriteLine("Error al procesar la recepción de transferencia: {0}. Devolviendo el dinero", ex.Message);
+
+                                        activity?.AddEvent(new ActivityEvent("Devolución de transferencia"));
+                                        activity?.AddException(ex);
 
                                         await _cuentaBancariaService.DevolverTransferenciaAsync(
                                            recepcionTransferencia.EventId,
@@ -107,6 +133,8 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
                                         _consumer.Commit(result);
 
                                         Console.WriteLine($"Devolución de transferencia: Origen {recepcionTransferencia.AggregateId}; Destino {recepcionTransferencia.CuentaDestinoId} {recepcionTransferencia.Monto}");
+
+                                        activity?.SetStatus(ActivityStatusCode.Error);
                                     }
 
                                     break;
@@ -115,9 +143,12 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
                                     break;
                             }
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             Console.WriteLine($"Error crítico procesando el evento {result.Message.Key}. Enviando a Retry/DLQ.");
+
+                            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                            activity?.AddException(ex);
 
                             await EnviarARetryODlqAsync(result.Message);
 
@@ -138,9 +169,32 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
             }, stoppingToken);
         }
 
+        /// <summary>
+        /// Función auxiliar que OpenTelemetry usa para leer los datos del Header de Confluent.Kafka
+        /// </summary>
+        private IEnumerable<string> ExtractTraceContext(Headers headers, string key)
+        {
+            if (headers.TryGetLastBytes(key, out var bytes))
+            {
+                return [Encoding.UTF8.GetString(bytes)];
+            }
+            return Enumerable.Empty<string>();
+        }
+
         private async Task EnviarARetryODlqAsync(Message<string, string> message)
         {
             await _producer.ProduceAsync(_configuration.GetValue<string>("Kafka:TopicDlq"), message);
         }
+    }
+
+    /// <summary>
+    /// Clase de telemetría segura aislada para el microservicio de Saldo
+    /// </summary>
+    public static class SaldoTelemetry
+    {
+        /// <summary>
+        /// Fuente del trace
+        /// </summary>
+        public static ActivitySource Source { get; } = new("Isra.Demos.Microservicios.RecepcionTransferencias");
     }
 }

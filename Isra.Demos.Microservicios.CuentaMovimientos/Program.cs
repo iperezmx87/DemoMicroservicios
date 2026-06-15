@@ -1,6 +1,7 @@
 using Isra.Demos.Microservicios.CuentaMovimientos;
 using Isra.Demos.Microservicios.CuentaMovimientos.Configuracion;
 using Isra.Demos.Microservicios.CuentaMovimientos.Consultas;
+using Isra.Demos.Microservicios.CuentaMovimientos.Monitoreo;
 using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
 using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,11 +9,39 @@ using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Polly;
 using Polly.Retry;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// 1. Configurar OpenTelemetry (Traces, Metrics y Logs)
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService(MicroservicioTelemetry.ServiceName))
+    .WithTracing(tracing => tracing
+        .AddSource(MicroservicioTelemetry.Source.Name) // Escucha nuestros eventos personalizados
+        .AddAspNetCoreInstrumentation()          // Rastrea llamadas HTTP entrantes automáticamente
+        .AddOtlpExporter(options =>
+        {
+            // Apunta al puerto gRPC estándar del OpenTelemetry Collector o Jaeger
+            options.Endpoint = new Uri(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? "http://localhost:4317");
+        }))
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddRuntimeInstrumentation()             // Métricas del CLR, GC y ThreadPool de .NET 10
+        .AddOtlpExporter());
+
+// 2. Correlacionar los Logs nativos de .NET con OpenTelemetry
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options.IncludeFormattedMessage = true;
+    options.IncludeScopes = true;
+    options.AddOtlpExporter();
+});
 
 // Configuración de CORS para permitir al frontend conectarse
 builder.Services.AddCors(options =>

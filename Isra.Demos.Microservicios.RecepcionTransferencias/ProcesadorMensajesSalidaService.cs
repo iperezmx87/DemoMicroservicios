@@ -1,7 +1,9 @@
 ﻿using Confluent.Kafka;
+using Isra.Demos.Microservicios.RecepcionTransferencias.Monitoreo;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
 using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
 using MongoDB.Driver;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace Isra.Demos.Microservicios.RecepcionTransferencias
@@ -50,30 +52,65 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
 
                 foreach (var msg in mensajesPendientes)
                 {
-                    Tuple<string, string> tplResultPublicar = new Tuple<string, string>("", "");
+                    // 2. Reconstruimos el contexto de la traza original almacenado en el documento de Mongo
+                    var parentContext = string.IsNullOrEmpty(msg.TraceId)
+                        ? default
+                        : ActivityContext.Parse(msg.TraceId, null);
 
-                    switch (JsonDocument.Parse(msg.Payload).RootElement.GetProperty("TipoEvento").GetString())
+                    // 3. Iniciamos un Span de tipo Producer que enlaza al flujo original del API
+                    using Activity activity = MicroservicioTelemetry.Source.StartActivity(
+                        "Outbox Relay - Receptor transferencias: Publicar a Kafka",
+                        ActivityKind.Producer,
+                        parentContext);
+
+                    var tipoEvento = JsonDocument.Parse(msg.Payload).RootElement.GetProperty("TipoEvento").GetString();
+
+                    // Enriquecemos la traza con metadata útil para el diagnóstico corporativo
+                    if (activity != null)
                     {
-                        case "TransferenciaRecibidaEvento":
-                            tplResultPublicar = await _colaMensajesService.PublicarTransferenciaRecibidaEventoAsync(
-                                JsonSerializer.Deserialize<TransferenciaRecibidaEvento>(msg.Payload));
-                            break;
-
-                        case "TransferenciaDevueltaEvento":
-                            tplResultPublicar = await _colaMensajesService.PublicarTransferenciaDevueltaEventoAsync(
-                                JsonSerializer.Deserialize<TransferenciaDevueltaEvento>(msg.Payload));
-                            break;
-
-                        default:
-                            break;
+                        activity.SetTag("messaging.system", "kafka");
+                        activity.SetTag("messaging.operation", "publish");
+                        activity.SetTag("banco.evento.tipo", tipoEvento);
+                        activity.SetTag("outbox.mensaje.id", msg.Id.ToString());
                     }
 
-                    if (tplResultPublicar.Item2 == nameof(PersistenceStatus.Persisted))
+                    Tuple<string, string> tplResultPublicar = new Tuple<string, string>("", "");
+
+                    try
                     {
-                        await _outboxCollection.UpdateOneAsync(
-                            m => m.Id == msg.Id,
-                            Builders<MensajeSalida>.Update.Set(m => m.Processed, true)
-                        );
+
+                        switch (JsonDocument.Parse(msg.Payload).RootElement.GetProperty("TipoEvento").GetString())
+                        {
+                            case "TransferenciaRecibidaEvento":
+                                tplResultPublicar = await _colaMensajesService.PublicarTransferenciaRecibidaEventoAsync(
+                                    JsonSerializer.Deserialize<TransferenciaRecibidaEvento>(msg.Payload));
+                                break;
+
+                            case "TransferenciaDevueltaEvento":
+                                tplResultPublicar = await _colaMensajesService.PublicarTransferenciaDevueltaEventoAsync(
+                                    JsonSerializer.Deserialize<TransferenciaDevueltaEvento>(msg.Payload));
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        if (tplResultPublicar.Item2 == nameof(PersistenceStatus.Persisted))
+                        {
+                            await _outboxCollection.UpdateOneAsync(
+                                m => m.Id == msg.Id,
+                                Builders<MensajeSalida>.Update.Set(m => m.Processed, true)
+                            );
+
+                            activity?.SetStatus(ActivityStatusCode.Ok);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // 4. Si el relay truena (por ejemplo, Kafka caído), registramos el fallo en OTel
+                        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                        activity?.AddException(ex);
+                        throw;
                     }
                 }
 

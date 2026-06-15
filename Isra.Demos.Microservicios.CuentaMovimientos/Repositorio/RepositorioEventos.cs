@@ -1,6 +1,8 @@
 using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
+using Isra.Demos.Microservicios.CuentaMovimientos.Monitoreo;
 using MongoDB.Driver;
 using Polly;
+using System.Diagnostics;
 
 namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
 {
@@ -44,6 +46,11 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
         {
             await _resiliencePipeline.ExecuteAsync(async token =>
             {
+                using Activity activity = MicroservicioTelemetry.Source.StartActivity("MongoDB - CuentasMovimientos: Guardar evento y mensaje Outbox", System.Diagnostics.ActivityKind.Internal);
+
+                activity.SetTag("cuenta.id", evento.AggregateId);
+                activity.SetTag("evento.id", evento.EventId);
+
                 using var session = await _client.StartSessionAsync();
                 session.StartTransaction();
 
@@ -58,7 +65,8 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
                         Topic = _configuration.GetValue<string>("Kafka:Topic"),
                         Id = evento.EventId,
                         OccurredOn = DateTime.UtcNow,
-                        Processed = false
+                        Processed = false,
+                        TraceId = Activity.Current.Id ?? string.Empty
                     };
 
                     switch (evento.TipoEvento)
@@ -80,9 +88,15 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
 
                     await session.CommitTransactionAsync();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     await session.AbortTransactionAsync();
+
+                    // Si falla, marcamos la actividad como errónea y guardamos la excepción
+                    activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                    activity?.AddException(ex);
+
+                    throw;
                 }
             });
         }

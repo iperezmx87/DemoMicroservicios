@@ -34,5 +34,10 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
         /// Bandera que indica si el mensaje ya fue procesado y enviado a Kafka. Esto es importante para evitar enviar el mismo evento varias veces en caso de fallos o reinicios del servicio.
         /// </summary>
         public bool Processed { get; set; } = false; // Para saber si ya se envió a Kafka
+
+        /// <summary>
+        /// Id del trace de open telemetry
+        /// </summary>
+        public string TraceId { get; set; }
     }
 }
