@@ -110,10 +110,6 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos
 
                             activity?.SetStatus(ActivityStatusCode.Ok);
                         }
-                        else
-                        {
-                            activity?.SetStatus(ActivityStatusCode.Error, "Kafka rechazó o no confirmó la persistencia del evento.");
-                        }
                     }
                     catch (Exception ex)
                     {

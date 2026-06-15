@@ -10,7 +10,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Infrastructure
         /// <summary>
         /// Nombre del servicio
         /// </summary>
-        public const string ServiceName = "RecepcionTransferenciasService";
+        public const string ServiceName = "Banco-Movimientos";
 
         /// <summary>
         /// Declaramos el ActivitySource como propiedad de solo lectura
@@ -22,7 +22,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Infrastructure
         /// </summary>
         static MicroservicioTelemetry()
         {
-            Source = new ActivitySource("Isra.Demos.Microservicios.RecepcionTramnsferencias");
+            Source = new ActivitySource("Isra.Demos.Microservicios.RecepcionTransferencias");
         }
     }
 }

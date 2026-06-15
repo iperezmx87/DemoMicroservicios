@@ -10,7 +10,7 @@ namespace Isra.Demos.Microservicios.CuentaMovimientos.Infrastructure
         /// <summary>
         /// Nombre del servicio
         /// </summary>
-        public const string ServiceName = "CuentaMovimientosService";
+        public const string ServiceName = "Banco-Movimientos";
 
         /// <summary>
         /// Declaramos el ActivitySource como propiedad de solo lectura

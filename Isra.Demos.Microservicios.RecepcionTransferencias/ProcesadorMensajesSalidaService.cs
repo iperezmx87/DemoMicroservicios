@@ -104,10 +104,6 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
 
                             activity?.SetStatus(ActivityStatusCode.Ok);
                         }
-                        else
-                        {
-                            activity?.SetStatus(ActivityStatusCode.Error, "Kafka rechazó o no confirmó la persistencia del evento.");
-                        }
                     }
                     catch (Exception ex)
                     {
