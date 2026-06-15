@@ -134,7 +134,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias
 
                                         Console.WriteLine($"Devolución de transferencia: Origen {recepcionTransferencia.AggregateId}; Destino {recepcionTransferencia.CuentaDestinoId} {recepcionTransferencia.Monto}");
 
-                                        activity?.SetStatus(ActivityStatusCode.Ok);
+                                        activity?.SetStatus(ActivityStatusCode.Error);
                                     }
 
                                     break;
