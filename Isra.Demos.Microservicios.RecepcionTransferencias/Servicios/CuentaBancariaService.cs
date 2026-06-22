@@ -1,8 +1,8 @@
-using Isra.Demos.Microservicios.RecepcionTransferencias.Consultas;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio;
+using Isra.Demos.Banking.PaymentExecution.Consultas;
+using Isra.Demos.Banking.PaymentExecution.Modelo;
+using Isra.Demos.Banking.PaymentExecution.Repositorio;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
+namespace Isra.Demos.Banking.PaymentExecution.Servicios
 {
     /// <summary>
     /// Servicio de operaciones sobre la cuenta bancaria. Este servicio es responsable de manejar las operaciones relacionadas con las cuentas bancarias, como la creación de cuentas, depósitos, retiros y la obtención de información de la cuenta. Utiliza un repositorio de eventos para almacenar y recuperar los eventos asociados a cada cuenta bancaria, lo que permite reconstruir el estado actual de la cuenta a partir de su historial de eventos. Este enfoque basado en eventos facilita la gestión de las operaciones en la cuenta bancaria y proporciona una forma eficiente de mantener un registro detallado de todas las transacciones realizadas en cada cuenta.

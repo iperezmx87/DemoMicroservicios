@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Isra.Demos.Microservicios.Saldo.Monitoreo
+namespace Isra.Demos.Banking.CustomerPosition.Monitoreo
 {
     /// <summary>
     /// Configuracion de open telemetry
@@ -22,7 +22,7 @@ namespace Isra.Demos.Microservicios.Saldo.Monitoreo
         /// </summary>
         static MicroservicioTelemetry()
         {
-            Source = new ActivitySource("Isra.Demos.Microservicios.Saldo");
+            Source = new ActivitySource("Isra.Demos.Banking.CustomerPosition");
         }
     }
 }

@@ -1,12 +1,12 @@
 ﻿using Confluent.Kafka;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
+using Isra.Demos.Banking.PaymentExecution.Modelo;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
+namespace Isra.Demos.Banking.PaymentExecution.Servicios
 {
     /// <summary>
     /// Implementación de la cola de mensajes

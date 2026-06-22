@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
+namespace Isra.Demos.Banking.FinancialAccounting.Modelo
 {
     /// <summary>
     /// Evento de dinero depositado

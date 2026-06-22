@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
+namespace Isra.Demos.Banking.CurrentAccount.Modelo
 {
     /// <summary>
     /// Modelo del evento

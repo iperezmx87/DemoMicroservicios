@@ -1,20 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>disable</Nullable>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<UserSecretsId>dotnet-Isra.Demos.Microservicios.Saldo-3942afa1-2b53-4f81-8c9f-18695fad4e25</UserSecretsId>
+		<UserSecretsId>dotnet-Isra.Demos.Banking.FinancialAccounting-9dc606f7-a9ba-47eb-b1aa-30a3997e8223</UserSecretsId>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
-		<PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
+		<PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="9.0.0" />
 		<PackageReference Include="Confluent.Kafka" Version="2.14.0" />
 		<PackageReference Include="Dapper" Version="2.1.72" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.4" />
-		<PackageReference Include="Npgsql" Version="10.0.2" />
+		<PackageReference Include="MongoDB.Driver" Version="3.1.0" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.16.0" />
 		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.16.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.2" />
@@ -24,12 +25,12 @@
 
 	<!-- Configuración de empaquetado para docker -->
 	<PropertyGroup>
-		<RootNamespace>Isra.Demos.Microservicios.Saldo</RootNamespace>
-		<ContainerRepository>pesimx87/isra-microservicios-saldo</ContainerRepository>
-		<ContainerImageTag>1.2.0</ContainerImageTag>
+		<RootNamespace>Isra.Demos.Banking.FinancialAccounting</RootNamespace>
+		<ContainerRepository>pesimx87/isra-banking-financial-accounting</ContainerRepository>
+		<ContainerImageTag>1.3.0</ContainerImageTag>
 		<ContainerRegistry>docker.io</ContainerRegistry>
 		<ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0</ContainerBaseImage>
-		<ContainerPort>8072</ContainerPort>
+		<ContainerPort>8073</ContainerPort>
 	</PropertyGroup>
 
 	<ItemGroup>

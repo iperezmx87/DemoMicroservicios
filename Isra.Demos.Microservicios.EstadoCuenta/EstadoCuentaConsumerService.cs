@@ -1,6 +1,6 @@
 using Confluent.Kafka;
 using Dapper;
-using Isra.Demos.Microservicios.EstadoCuenta.Modelo;
+using Isra.Demos.Banking.FinancialAccounting.Modelo;
 using Microsoft.Data.SqlClient;
 using OpenTelemetry.Context.Propagation;
 using Polly;
@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
-namespace Isra.Demos.Microservicios.EstadoCuenta
+namespace Isra.Demos.Banking.FinancialAccounting
 {
     /// <summary>
     /// Servicio generador de eventos de estado de cuenta, que se suscribe a un tópico de Kafka y actualiza el estado de cuenta en una base de datos SQL Server.

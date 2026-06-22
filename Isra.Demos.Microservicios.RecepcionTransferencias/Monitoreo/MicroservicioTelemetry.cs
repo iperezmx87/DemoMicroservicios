@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias.Monitoreo
+namespace Isra.Demos.Banking.PaymentExecution.Monitoreo
 {
     /// <summary>
     /// Configuracion de open telemetry
@@ -22,7 +22,7 @@ namespace Isra.Demos.Microservicios.RecepcionTransferencias.Monitoreo
         /// </summary>
         static MicroservicioTelemetry()
         {
-            Source = new ActivitySource("Isra.Demos.Microservicios.RecepcionTransferencias");
+            Source = new ActivitySource("Isra.Demos.Banking.PaymentExecution");
         }
     }
 }

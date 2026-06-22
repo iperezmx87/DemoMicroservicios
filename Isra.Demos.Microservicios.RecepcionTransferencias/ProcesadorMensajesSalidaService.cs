@@ -1,12 +1,12 @@
 ﻿using Confluent.Kafka;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Monitoreo;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
+using Isra.Demos.Banking.PaymentExecution.Monitoreo;
+using Isra.Demos.Banking.PaymentExecution.Modelo;
+using Isra.Demos.Banking.PaymentExecution.Servicios;
 using MongoDB.Driver;
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias
+namespace Isra.Demos.Banking.PaymentExecution
 {
     /// <summary>
     /// Procesador de los mensajes de salida de mongodb que los publica en kafka

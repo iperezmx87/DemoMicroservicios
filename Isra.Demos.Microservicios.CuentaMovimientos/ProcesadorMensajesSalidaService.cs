@@ -1,12 +1,12 @@
 ﻿using Confluent.Kafka;
-using Isra.Demos.Microservicios.CuentaMovimientos.Monitoreo;
-using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
-using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
+using Isra.Demos.Banking.CurrentAccount.Monitoreo;
+using Isra.Demos.Banking.CurrentAccount.Modelo;
+using Isra.Demos.Banking.CurrentAccount.Servicios;
 using MongoDB.Driver;
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos
+namespace Isra.Demos.Banking.CurrentAccount
 {
     /// <summary>
     /// Procesador de los mensajes de salida de mongodb que los publica en kafka

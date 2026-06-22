@@ -1,6 +1,6 @@
-using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
+using Isra.Demos.Banking.CustomerAgreement.Modelo;
 
-namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
+namespace Isra.Demos.Banking.CustomerAgreement.Repositorio
 {
     /// <summary>
     /// Interfaz para el repositorio de cuentas de usuario.

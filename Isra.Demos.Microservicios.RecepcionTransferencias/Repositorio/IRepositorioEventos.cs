@@ -1,7 +1,7 @@
 ﻿
-using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
+using Isra.Demos.Banking.PaymentExecution.Modelo;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio
+namespace Isra.Demos.Banking.PaymentExecution.Repositorio
 {
     /// <summary>
     /// Repositorio de eventos para un sistema basado en Event Sourcing. Este repositorio es responsable de almacenar y recuperar eventos que representan las acciones y cambios de estado en el sistema. Al implementar esta interfaz, se garantiza que los eventos se gestionen de manera consistente, permitiendo la reconstrucción del estado de los agregados a partir de los eventos almacenados. Además, este repositorio facilita la auditoría y el análisis de los eventos que han ocurrido en el sistema a lo largo del tiempo.

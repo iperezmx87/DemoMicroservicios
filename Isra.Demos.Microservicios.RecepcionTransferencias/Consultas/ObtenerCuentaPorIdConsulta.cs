@@ -1,9 +1,9 @@
 ﻿using Microsoft.Data.SqlClient;
 using Dapper;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
+using Isra.Demos.Banking.PaymentExecution.Modelo;
 using Polly;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias.Consultas
+namespace Isra.Demos.Banking.PaymentExecution.Consultas
 {
     /// <summary>
     /// Consulta para obtener la información de una cuenta por su ID desde la base de datos SQL Server.

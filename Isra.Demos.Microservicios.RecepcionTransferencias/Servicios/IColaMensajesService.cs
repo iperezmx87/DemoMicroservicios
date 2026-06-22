@@ -1,6 +1,6 @@
-﻿using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
+﻿using Isra.Demos.Banking.PaymentExecution.Modelo;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias.Servicios
+namespace Isra.Demos.Banking.PaymentExecution.Servicios
 {
     /// <summary>
     /// Cola de mensajes

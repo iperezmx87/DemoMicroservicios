@@ -1,5 +1,5 @@
-using Isra.Demos.Microservicios.UsuariosCuentas.Repositorio;
-using Isra.Demos.Microservicios.UsuariosCuentas.Servicio;
+using Isra.Demos.Banking.CustomerAgreement.Repositorio;
+using Isra.Demos.Banking.CustomerAgreement.Servicio;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;

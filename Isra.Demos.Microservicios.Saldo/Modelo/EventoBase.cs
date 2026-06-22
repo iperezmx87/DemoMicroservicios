@@ -1,4 +1,4 @@
-﻿namespace Isra.Demos.Microservicios.Saldo.Modelo
+﻿namespace Isra.Demos.Banking.CustomerPosition.Modelo
 {
     /// <summary>
     /// Modelo del evento

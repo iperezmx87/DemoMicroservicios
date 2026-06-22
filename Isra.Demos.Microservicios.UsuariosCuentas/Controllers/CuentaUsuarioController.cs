@@ -1,5 +1,5 @@
-using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
-using Isra.Demos.Microservicios.UsuariosCuentas.Servicio;
+using Isra.Demos.Banking.CustomerAgreement.Modelo;
+using Isra.Demos.Banking.CustomerAgreement.Servicio;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Isra.Demos.Microservicios.UsuariosCuentas.Controllers
+namespace Isra.Demos.Banking.CustomerAgreement.Controllers
 {
     /// <summary>
     /// Controller de cuentas usuario. Esta clase es responsable de manejar las solicitudes HTTP relacionadas con las cuentas de usuario, como la creación, actualización, eliminación y obtención de cuentas de usuario. La implementación específica de los métodos en este controller dependerá de la lógica de negocio y los requisitos del sistema, así como del tipo de almacenamiento utilizado (por ejemplo, base de datos relacional, NoSQL, etc.). En esta clase se pueden incluir validaciones adicionales, manejo de errores y cualquier otra lógica necesaria para garantizar el correcto funcionamiento del controller de cuentas de usuario.

@@ -1,9 +1,9 @@
-using Isra.Demos.Microservicios.RecepcionTransferencias.Monitoreo;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
+using Isra.Demos.Banking.PaymentExecution.Monitoreo;
+using Isra.Demos.Banking.PaymentExecution.Modelo;
 using MongoDB.Driver;
 using System.Diagnostics;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio
+namespace Isra.Demos.Banking.PaymentExecution.Repositorio
 {
     /// <summary>
     /// Implementación del repositorio de eventos usando MongoDB

@@ -1,6 +1,6 @@
-using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
+using Isra.Demos.Banking.CurrentAccount.Modelo;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Servicios
+namespace Isra.Demos.Banking.CurrentAccount.Servicios
 {
     /// <summary>
     /// Servicio para manejar operaciones en cuentas bancarias

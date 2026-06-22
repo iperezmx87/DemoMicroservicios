@@ -1,10 +1,10 @@
 using Dapper;
-using Isra.Demos.Microservicios.UsuariosCuentas.Modelo;
+using Isra.Demos.Banking.CustomerAgreement.Modelo;
 using Microsoft.Data.SqlClient;
 using Polly;
 using System.Data;
 
-namespace Isra.Demos.Microservicios.UsuariosCuentas.Repositorio
+namespace Isra.Demos.Banking.CustomerAgreement.Repositorio
 {
     /// <summary>
     /// Repositorio para la gestión de cuentas de usuario. Esta clase implementa la interfaz ICuentaRepositorio y proporciona métodos para crear, actualizar, eliminar y obtener cuentas de usuario. La implementación específica de estos métodos dependerá de la lógica de negocio y los requisitos del sistema, así como del tipo de almacenamiento utilizado (por ejemplo, base de datos relacional, NoSQL, etc.). En esta clase se pueden incluir validaciones adicionales, manejo de errores y cualquier otra lógica necesaria para garantizar el correcto funcionamiento del repositorio de cuentas de usuario.

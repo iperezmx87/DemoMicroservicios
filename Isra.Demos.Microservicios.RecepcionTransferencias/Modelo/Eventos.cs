@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
+namespace Isra.Demos.Banking.PaymentExecution.Modelo
 {
     /// <summary>
     /// Evento de dinero depositado

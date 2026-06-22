@@ -1,4 +1,4 @@
-﻿namespace Isra.Demos.Microservicios.UsuariosCuentas.Modelo
+﻿namespace Isra.Demos.Banking.CustomerAgreement.Modelo
 {
     /// <summary>
     /// Cuenta de usuario que representa la información de la cuenta asociada a un usuario.

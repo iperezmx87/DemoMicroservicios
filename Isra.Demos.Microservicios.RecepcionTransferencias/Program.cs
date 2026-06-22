@@ -1,9 +1,9 @@
-using Isra.Demos.Microservicios.RecepcionTransferencias;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Configuracion;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Consultas;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Monitoreo;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Repositorio;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
+using Isra.Demos.Banking.PaymentExecution;
+using Isra.Demos.Banking.PaymentExecution.Configuracion;
+using Isra.Demos.Banking.PaymentExecution.Consultas;
+using Isra.Demos.Banking.PaymentExecution.Monitoreo;
+using Isra.Demos.Banking.PaymentExecution.Repositorio;
+using Isra.Demos.Banking.PaymentExecution.Servicios;
 using Microsoft.Data.SqlClient;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;

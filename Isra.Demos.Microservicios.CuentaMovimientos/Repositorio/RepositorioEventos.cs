@@ -1,10 +1,10 @@
-using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
-using Isra.Demos.Microservicios.CuentaMovimientos.Monitoreo;
+using Isra.Demos.Banking.CurrentAccount.Modelo;
+using Isra.Demos.Banking.CurrentAccount.Monitoreo;
 using MongoDB.Driver;
 using Polly;
 using System.Diagnostics;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Repositorio
+namespace Isra.Demos.Banking.CurrentAccount.Repositorio
 {
     /// <summary>
     /// Implementación del repositorio de eventos usando MongoDB

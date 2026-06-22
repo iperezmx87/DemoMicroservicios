@@ -1,9 +1,9 @@
-using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
-using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
+using Isra.Demos.Banking.CurrentAccount.Modelo;
+using Isra.Demos.Banking.CurrentAccount.Servicios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Controllers
+namespace Isra.Demos.Banking.CurrentAccount.Controllers
 {
     /// <summary>
     /// Controlador para operaciones de cuentas bancarias

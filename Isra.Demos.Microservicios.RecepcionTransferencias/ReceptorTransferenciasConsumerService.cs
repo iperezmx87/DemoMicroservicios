@@ -1,12 +1,12 @@
 ﻿using Confluent.Kafka;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
+using Isra.Demos.Banking.PaymentExecution.Modelo;
+using Isra.Demos.Banking.PaymentExecution.Servicios;
 using OpenTelemetry.Context.Propagation;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias
+namespace Isra.Demos.Banking.PaymentExecution
 {
     /// <summary>
     /// Backgrond service que procesa las transferencias enviadas para hacer la aplicación de la misma

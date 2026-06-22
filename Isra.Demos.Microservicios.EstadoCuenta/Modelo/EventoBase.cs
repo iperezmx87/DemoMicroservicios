@@ -1,4 +1,4 @@
-﻿namespace Isra.Demos.Microservicios.EstadoCuenta.Modelo
+﻿namespace Isra.Demos.Banking.FinancialAccounting.Modelo
 {
     /// <summary>
     /// Modelo del evento

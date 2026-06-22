@@ -1,7 +1,7 @@
-﻿using Isra.Demos.Microservicios.CuentaMovimientos.Modelo;
+﻿using Isra.Demos.Banking.CurrentAccount.Modelo;
 using MongoDB.Bson.Serialization;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Configuracion
+namespace Isra.Demos.Banking.CurrentAccount.Configuracion
 {
     /// <summary>
     /// Clase de configuración para MongoDB, donde se registran los mapeos de las clases de eventos para que MongoDB pueda serializarlas y deserializarlas correctamente.

@@ -1,7 +1,7 @@
-﻿using Isra.Demos.Microservicios.RecepcionTransferencias.Modelo;
+﻿using Isra.Demos.Banking.PaymentExecution.Modelo;
 using MongoDB.Bson.Serialization;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias.Configuracion
+namespace Isra.Demos.Banking.PaymentExecution.Configuracion
 {
     /// <summary>
     /// Clase de configuración para MongoDB, donde se registran los mapeos de las clases de eventos para que MongoDB pueda serializarlas y deserializarlas correctamente.

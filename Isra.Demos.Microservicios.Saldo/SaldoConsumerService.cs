@@ -1,6 +1,6 @@
 using Confluent.Kafka;
 using Dapper;
-using Isra.Demos.Microservicios.Saldo.Modelo;
+using Isra.Demos.Banking.CustomerPosition.Modelo;
 using Npgsql;
 using OpenTelemetry.Context.Propagation;
 using Polly;
@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
-namespace Isra.Demos.Microservicios.Saldo
+namespace Isra.Demos.Banking.CustomerPosition
 {
     /// <summary>
     /// worker que se ejecuta en segundo plano y realiza tareas periódicas, como registrar información sobre su ejecución. En este caso, el worker registra un mensaje cada segundo indicando que está en funcionamiento, lo que puede ser útil para monitorear su estado y asegurarse de que está activo. El uso de un BackgroundService permite que el worker se ejecute de manera asíncrona y se detenga de forma ordenada cuando se solicite la cancelación, lo que es esencial para garantizar la estabilidad y el rendimiento de la aplicación en la que se integra este worker.

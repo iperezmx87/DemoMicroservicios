@@ -1,5 +1,5 @@
-using Isra.Demos.Microservicios.EstadoCuenta;
-using Isra.Demos.Microservicios.EstadoCuenta.Monitoreo;
+using Isra.Demos.Banking.FinancialAccounting;
+using Isra.Demos.Banking.FinancialAccounting.Monitoreo;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;

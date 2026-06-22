@@ -1,9 +1,9 @@
-using Isra.Demos.Microservicios.RecepcionTransferencias.Consultas;
-using Isra.Demos.Microservicios.RecepcionTransferencias.Servicios;
+using Isra.Demos.Banking.PaymentExecution.Consultas;
+using Isra.Demos.Banking.PaymentExecution.Servicios;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Isra.Demos.Microservicios.RecepcionTransferencias.Modelo
+namespace Isra.Demos.Banking.PaymentExecution.Modelo
 {
     /// <summary>
     /// Agregado que representa una cuenta bancaria y su estado

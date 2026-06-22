@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Isra.Demos.Microservicios.EstadoCuenta.Monitoreo
+namespace Isra.Demos.Banking.FinancialAccounting.Monitoreo
 {
     /// <summary>
     /// Configuracion de open telemetry
@@ -22,7 +22,7 @@ namespace Isra.Demos.Microservicios.EstadoCuenta.Monitoreo
         /// </summary>
         static MicroservicioTelemetry()
         {
-            Source = new ActivitySource("Isra.Demos.Microservicios.EstadoCuenta");
+            Source = new ActivitySource("Isra.Demos.Banking.FinancialAccounting");
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
+namespace Isra.Demos.Banking.CurrentAccount.Modelo
 {
     /// <summary>
     /// Solicitud para operaciones monetarias

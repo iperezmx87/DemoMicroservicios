@@ -1,5 +1,5 @@
-using Isra.Demos.Microservicios.Saldo;
-using Isra.Demos.Microservicios.Saldo.Monitoreo;
+using Isra.Demos.Banking.CustomerPosition;
+using Isra.Demos.Banking.CustomerPosition.Monitoreo;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;

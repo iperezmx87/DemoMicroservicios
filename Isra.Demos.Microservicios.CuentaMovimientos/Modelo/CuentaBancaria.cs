@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Isra.Demos.Microservicios.CuentaMovimientos.Modelo
+namespace Isra.Demos.Banking.CurrentAccount.Modelo
 {
     /// <summary>
     /// Agregado que representa una cuenta bancaria y su estado

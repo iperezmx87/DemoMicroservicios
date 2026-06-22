@@ -1,9 +1,9 @@
-using Isra.Demos.Microservicios.CuentaMovimientos;
-using Isra.Demos.Microservicios.CuentaMovimientos.Configuracion;
-using Isra.Demos.Microservicios.CuentaMovimientos.Consultas;
-using Isra.Demos.Microservicios.CuentaMovimientos.Monitoreo;
-using Isra.Demos.Microservicios.CuentaMovimientos.Repositorio;
-using Isra.Demos.Microservicios.CuentaMovimientos.Servicios;
+using Isra.Demos.Banking.CurrentAccount;
+using Isra.Demos.Banking.CurrentAccount.Configuracion;
+using Isra.Demos.Banking.CurrentAccount.Consultas;
+using Isra.Demos.Banking.CurrentAccount.Monitoreo;
+using Isra.Demos.Banking.CurrentAccount.Repositorio;
+using Isra.Demos.Banking.CurrentAccount.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
