@@ -1,4 +1,4 @@
-﻿namespace Isra.Demos.Microservicios.WebApi.Contratos
+﻿namespace Isra.Demos.Banking.ConsumerChannels.Gateway.Contratos
 {
     /// <summary>
     /// Interface de repositorio para consultar el saldo actual de una cuenta. Permite abstraer la lógica de acceso a datos y facilitar el mantenimiento del código.

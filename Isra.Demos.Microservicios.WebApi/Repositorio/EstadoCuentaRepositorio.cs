@@ -1,10 +1,10 @@
 ﻿using Dapper;
-using Isra.Demos.Microservicios.WebApi.Contratos;
-using Isra.Demos.Microservicios.WebApi.Modelo;
+using Isra.Demos.Banking.ConsumerChannels.Gateway.Contratos;
+using Isra.Demos.Banking.ConsumerChannels.Gateway.Modelo;
 using Microsoft.Data.SqlClient;
 using Polly;
 
-namespace Isra.Demos.Microservicios.WebApi.Repositorio
+namespace Isra.Demos.Banking.ConsumerChannels.Gateway.Repositorio
 {
     /// <summary>
     /// Repositorio de estado de cuenta, se encarga de obtener el estado de cuenta para un aggregateId específico. El estado de cuenta incluye el saldo actual y los movimientos asociados al aggregateId.

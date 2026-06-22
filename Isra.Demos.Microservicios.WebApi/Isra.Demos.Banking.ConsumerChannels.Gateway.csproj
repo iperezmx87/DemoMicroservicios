@@ -22,9 +22,9 @@
 
 	<!-- Configuración de empaquetado para docker -->
 	<PropertyGroup>
-		<RootNamespace>Isra.Demos.Microservicios.WebApi</RootNamespace>
-		<ContainerRepository>pesimx87/isra-microservicios-web-api</ContainerRepository>
-		<ContainerImageTag>1.2.0</ContainerImageTag>
+		<RootNamespace>Isra.Demos.Banking.ConsumerChannels.Gateway</RootNamespace>
+		<ContainerRepository>pesimx87/isra-banking-consumer-channels-gateway</ContainerRepository>
+		<ContainerImageTag>1.3.0</ContainerImageTag>
 		<ContainerRegistry>docker.io</ContainerRegistry>
 		<ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0</ContainerBaseImage>
 		<ContainerPort>8074</ContainerPort>

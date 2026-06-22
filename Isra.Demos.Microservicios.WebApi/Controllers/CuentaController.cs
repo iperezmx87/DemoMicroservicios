@@ -1,8 +1,8 @@
-using Isra.Demos.Microservicios.WebApi.Contratos;
+using Isra.Demos.Banking.ConsumerChannels.Gateway.Contratos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Isra.Demos.Microservicios.WebApi.Controllers
+namespace Isra.Demos.Banking.ConsumerChannels.Gateway.Controllers
 {
     /// <summary>
     /// Api de cuentas

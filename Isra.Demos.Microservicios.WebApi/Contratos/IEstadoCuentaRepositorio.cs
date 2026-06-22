@@ -1,6 +1,6 @@
-﻿using Isra.Demos.Microservicios.WebApi.Modelo;
+﻿using Isra.Demos.Banking.ConsumerChannels.Gateway.Modelo;
 
-namespace Isra.Demos.Microservicios.WebApi.Contratos
+namespace Isra.Demos.Banking.ConsumerChannels.Gateway.Contratos
 {
     /// <summary>
     /// Repositorio para obtener el estado de cuenta de una cuenta bancaria, se utiliza para mostrar la información de la cuenta bancaria en el estado de cuenta

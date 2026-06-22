@@ -1,4 +1,4 @@
-﻿namespace Isra.Demos.Microservicios.WebApi.Contratos
+﻿namespace Isra.Demos.Banking.ConsumerChannels.Gateway.Contratos
 {
     /// <summary>
     /// Generador del estado de cuenta pdf

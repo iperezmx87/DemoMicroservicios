@@ -1,12 +1,12 @@
-﻿using Isra.Demos.Microservicios.WebApi.Contratos;
-using Isra.Demos.Microservicios.WebApi.Modelo;
+﻿using Isra.Demos.Banking.ConsumerChannels.Gateway.Contratos;
+using Isra.Demos.Banking.ConsumerChannels.Gateway.Modelo;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System.Globalization;
 using System.Text;
 
-namespace Isra.Demos.Microservicios.WebApi.Servicios
+namespace Isra.Demos.Banking.ConsumerChannels.Gateway.Servicios
 {
     /// <summary>
     /// Generador de estados de cuenta pdf con QuestPDF

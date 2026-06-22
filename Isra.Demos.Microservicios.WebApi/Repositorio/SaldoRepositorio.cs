@@ -1,9 +1,9 @@
 ﻿using Dapper;
-using Isra.Demos.Microservicios.WebApi.Contratos;
+using Isra.Demos.Banking.ConsumerChannels.Gateway.Contratos;
 using Npgsql;
 using Polly;
 
-namespace Isra.Demos.Microservicios.WebApi.Repositorio
+namespace Isra.Demos.Banking.ConsumerChannels.Gateway.Repositorio
 {
     /// <summary>
     /// Repositorio que implementa la interfaz ISaldoRepositorio para acceder a la base de datos PostgreSQL y obtener el saldo actualizado de una cuenta después de una transacción. Utiliza Dapper para ejecutar consultas SQL de manera eficiente.

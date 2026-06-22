@@ -3,7 +3,7 @@
     <Project Path="Isra.Demos.Microservicios.CuentaMovimientos/Isra.Demos.Banking.CurrentAccount.csproj" />
   </Folder>
   <Folder Name="/Api Gateway/">
-    <Project Path="Isra.Demos.Microservicios.WebApi/Isra.Demos.Microservicios.WebApi.csproj" />
+    <Project Path="Isra.Demos.Microservicios.WebApi/Isra.Demos.Banking.ConsumerChannels.Gateway.csproj" />
   </Folder>
   <Folder Name="/Consumidores eventos/">
     <Project Path="Isra.Demos.Microservicios.EstadoCuenta/Isra.Demos.Banking.FinancialAccounting.csproj" />

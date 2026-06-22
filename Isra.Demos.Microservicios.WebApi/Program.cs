@@ -1,6 +1,6 @@
-using Isra.Demos.Microservicios.WebApi.Contratos;
-using Isra.Demos.Microservicios.WebApi.Repositorio;
-using Isra.Demos.Microservicios.WebApi.Servicios;
+using Isra.Demos.Banking.ConsumerChannels.Gateway.Contratos;
+using Isra.Demos.Banking.ConsumerChannels.Gateway.Repositorio;
+using Isra.Demos.Banking.ConsumerChannels.Gateway.Servicios;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;

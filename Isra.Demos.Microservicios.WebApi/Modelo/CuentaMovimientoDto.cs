@@ -1,4 +1,4 @@
-﻿namespace Isra.Demos.Microservicios.WebApi.Modelo
+﻿namespace Isra.Demos.Banking.ConsumerChannels.Gateway.Modelo
 {
     /// <summary>
     /// Dto de la cuenta bancaria, se utiliza para mostrar la información de la cuenta bancaria en el estado de cuenta
