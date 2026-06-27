@@ -9,7 +9,7 @@ namespace Isra.Demos.Banking.CurrentAccount.Controllers
     /// Controlador para operaciones de cuentas bancarias
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/current-account")]
     [Authorize]
     public class CuentasController : ControllerBase
     {
@@ -27,17 +27,17 @@ namespace Isra.Demos.Banking.CurrentAccount.Controllers
         /// <summary>
         /// Depositar dinero en una cuenta
         /// </summary>
-        [HttpPost("{cuentaId:guid}/depositar")]
-        public async Task<ActionResult<object>> Depositar(Guid cuentaId, [FromBody] OperacionMonetariaRequest request)
+        [HttpPost("{accountId:guid}/deposit-fulfillment")]
+        public async Task<ActionResult<object>> Depositar(Guid accountId, [FromBody] OperacionMonetariaRequest request)
         {
             try
             {
-                await _cuentaService.DepositarAsync(cuentaId, request.Monto);
-                var cuenta = await _cuentaService.ObtenerCuentaAsync(cuentaId);
+                await _cuentaService.DepositarAsync(accountId, request.Monto);
+                var cuenta = await _cuentaService.ObtenerCuentaAsync(accountId);
                 return Ok(new
                 {
                     mensaje = "Depósito realizado exitosamente",
-                    cuentaId,
+                    accountId,
                     saldoActual = cuenta.Saldo
                 });
             }
@@ -54,17 +54,17 @@ namespace Isra.Demos.Banking.CurrentAccount.Controllers
         /// <summary>
         /// Retirar dinero de una cuenta
         /// </summary>
-        [HttpPost("{cuentaId:guid}/retirar")]
-        public async Task<ActionResult<object>> Retirar(Guid cuentaId, [FromBody] OperacionMonetariaRequest request)
+        [HttpPost("{accountId:guid}/withdrawal-fulfillment")]
+        public async Task<ActionResult<object>> Retirar(Guid accountId, [FromBody] OperacionMonetariaRequest request)
         {
             try
             {
-                await _cuentaService.RetirarAsync(cuentaId, request.Monto);
-                var cuenta = await _cuentaService.ObtenerCuentaAsync(cuentaId);
+                await _cuentaService.RetirarAsync(accountId, request.Monto);
+                var cuenta = await _cuentaService.ObtenerCuentaAsync(accountId);
                 return Ok(new
                 {
                     mensaje = "Retiro realizado exitosamente",
-                    cuentaId,
+                    accountId,
                     saldoActual = cuenta.Saldo
                 });
             }
@@ -81,13 +81,13 @@ namespace Isra.Demos.Banking.CurrentAccount.Controllers
         /// <summary>
         /// Transferir dinero entre dos cuentas
         /// </summary>
-        [HttpPost("transferir")]
-        public async Task<ActionResult<object>> Transferir([FromBody] TransferenciaRequest request)
+        [HttpPost("{accountId:guid}/initiate-transfer-fulfillment")]
+        public async Task<ActionResult<object>> Transferir(Guid accountId, [FromBody] TransferenciaRequest request)
         {
             try
             {
                 await _cuentaService.TransferirAsync(
-                    request.CuentaOrigenId,
+                    accountId,
                     request.CuentaDestinoId,
                     request.Monto
                 );

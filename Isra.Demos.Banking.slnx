@@ -1,17 +1,17 @@
 <Solution>
   <Folder Name="/Movimientos cuenta/">
-    <Project Path="Isra.Demos.Microservicios.CuentaMovimientos/Isra.Demos.Banking.CurrentAccount.csproj" />
+    <Project Path="Isra.Demos.Banking.CurrentAccount/Isra.Demos.Banking.CurrentAccount.csproj" />
   </Folder>
   <Folder Name="/Api Gateway/">
-    <Project Path="Isra.Demos.Microservicios.WebApi/Isra.Demos.Banking.ConsumerChannels.Gateway.csproj" />
+    <Project Path="Isra.Demos.Banking.ConsumerChannels.Gateway/Isra.Demos.Banking.ConsumerChannels.Gateway.csproj" />
   </Folder>
   <Folder Name="/Consumidores eventos/">
-    <Project Path="Isra.Demos.Microservicios.EstadoCuenta/Isra.Demos.Banking.FinancialAccounting.csproj" />
-    <Project Path="Isra.Demos.Microservicios.RecepcionTransferencias/Isra.Demos.Banking.PaymentExecution.csproj" Id="95500a8d-e6e4-41f9-82fa-3793dd4369d1" />
-    <Project Path="Isra.Demos.Microservicios.Saldo/Isra.Demos.Banking.CustomerPosition.csproj" />
+    <Project Path="Isra.Demos.Banking.FinancialAccounting/Isra.Demos.Banking.FinancialAccounting.csproj" />
+    <Project Path="Isra.Demos.Banking.PaymentExecution/Isra.Demos.Banking.PaymentExecution.csproj" Id="95500a8d-e6e4-41f9-82fa-3793dd4369d1" />
+    <Project Path="Isra.Demos.Banking.CustomerPosition/Isra.Demos.Banking.CustomerPosition.csproj" />
   </Folder>
   <Folder Name="/Pruebas/" />
   <Folder Name="/Usuarios y cuentas/">
-    <Project Path="Isra.Demos.Microservicios.UsuariosCuentas/Isra.Demos.Banking.CustomerAgreement.csproj" Id="a04f0591-4251-49ab-8d96-39f983e6bb84" />
+    <Project Path="Isra.Demos.Banking.CustomerAgreement/Isra.Demos.Banking.CustomerAgreement.csproj" Id="a04f0591-4251-49ab-8d96-39f983e6bb84" />
   </Folder>
 </Solution>
